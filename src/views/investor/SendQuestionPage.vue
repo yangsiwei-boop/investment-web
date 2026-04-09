@@ -164,7 +164,7 @@ import { ElMessage } from 'element-plus'
 import { ArrowLeft } from '@element-plus/icons-vue'
 import * as investorApi from '@/api/investor'
 import * as questionApi from '@/api/question'
-import type { Project } from '@/types'
+import type { Teaser } from '@/types'
 import type { QuestionLibraryItem } from '@/api/question'
 
 const router = useRouter()
@@ -172,7 +172,7 @@ const route = useRoute()
 
 const projectId = Number(route.params.id)
 
-const project = ref<Project | null>(null)
+const project = ref<Teaser | null>(null)
 const questionType = ref('template')
 const selectedQuestion = ref<QuestionLibraryItem | null>(null)
 const investorMessage = ref('')
@@ -224,7 +224,8 @@ function selectQuestion(question: QuestionLibraryItem) {
 
 async function loadProject() {
   try {
-    // TODO: 加载项目信息
+    const res = await investorApi.getTeaserDetail(projectId)
+    project.value = res.data
   } catch (error) {
     console.error('Failed to load project:', error)
   }

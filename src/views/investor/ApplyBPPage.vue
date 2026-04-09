@@ -11,6 +11,17 @@
     </div>
 
     <div class="form-container">
+      <div class="teaser-card" v-if="teaser">
+        <div class="teaser-icon">{{ teaser.iconEmoji || '📋' }}</div>
+        <div class="teaser-info">
+          <div class="teaser-title">{{ teaser.title }}</div>
+          <div class="teaser-meta">
+            <span v-if="teaser.industry">{{ teaser.industry }}</span>
+            <span v-if="teaser.financingStage">{{ teaser.financingStage }}</span>
+          </div>
+        </div>
+      </div>
+
       <el-form
         ref="formRef"
         :model="form"
@@ -67,6 +78,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { ArrowLeft } from '@element-plus/icons-vue'
 import * as investorApi from '@/api/investor'
+import type { Teaser } from '@/types'
 
 const router = useRouter()
 const route = useRoute()
@@ -74,6 +86,7 @@ const route = useRoute()
 const projectId = Number(route.params.id)
 const formRef = ref<FormInstance>()
 const submitting = ref(false)
+const teaser = ref<Teaser | null>(null)
 
 const form = reactive({
   applicationReason: '',
@@ -89,9 +102,10 @@ const rules: FormRules = {
 
 async function loadProject() {
   try {
-    // TODO: 加载项目信息
+    const res = await investorApi.getTeaserDetail(projectId)
+    teaser.value = res.data
   } catch (error) {
-    console.error('Failed to load project:', error)
+    console.error('Failed to load teaser:', error)
   }
 }
 
@@ -163,6 +177,53 @@ onMounted(() => {
 
 .form-container {
   max-width: 700px;
+}
+
+.teaser-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  margin-bottom: 24px;
+}
+
+.teaser-icon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.teaser-info {
+  flex: 1;
+}
+
+.teaser-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 6px;
+}
+
+.teaser-meta {
+  display: flex;
+  gap: 8px;
+
+  span {
+    padding: 2px 8px;
+    background: #f3f4f6;
+    color: #6b7280;
+    border-radius: 4px;
+    font-size: 12px;
+  }
 }
 
 .info-card {

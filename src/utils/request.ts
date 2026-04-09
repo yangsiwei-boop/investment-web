@@ -62,8 +62,7 @@ async function refreshToken(): Promise<string | null> {
 }
 
 // 清除登录状态并跳转
-function clearAuthAndRedirect(reason: string) {
-  console.warn('[Auth] clearAuthAndRedirect:', reason)
+function clearAuthAndRedirect() {
   localStorage.removeItem('token')
   localStorage.removeItem('refreshToken')
   router.push({ name: 'Login' })
@@ -99,13 +98,13 @@ service.interceptors.response.use(
             } else {
               retryQueue.forEach(({ reject }) => reject(new Error('Token refresh failed')))
               retryQueue = []
-              clearAuthAndRedirect('token refresh failed')
+              clearAuthAndRedirect()
             }
           }).catch(() => {
             isRefreshing = false
             retryQueue.forEach(({ reject }) => reject(new Error('Token refresh failed')))
             retryQueue = []
-            clearAuthAndRedirect('token refresh error')
+            clearAuthAndRedirect()
           })
         }
 
@@ -116,12 +115,11 @@ service.interceptors.response.use(
 
       // 20003/20005: Token无效/Refresh Token无效
       if (res.code === 20003 || res.code === 20005) {
-        clearAuthAndRedirect('token invalid: ' + res.code)
+        clearAuthAndRedirect()
         return Promise.reject(new Error(res.message || '认证失败'))
       }
 
       // 其他业务错误（不跳登录页）
-      console.warn('[API] Business error:', res.code, res.message)
       ElMessage.error(res.message || '请求失败')
       return Promise.reject(new Error(res.message || '请求失败'))
     }
@@ -135,7 +133,7 @@ service.interceptors.response.use(
       switch (error.response.status) {
         case 401:
           ElMessage.error('登录已过期，请重新登录')
-          clearAuthAndRedirect('HTTP 401')
+          clearAuthAndRedirect()
           break
         case 403:
           ElMessage.error('没有权限访问')

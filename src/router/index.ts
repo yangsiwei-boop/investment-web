@@ -174,7 +174,6 @@ router.beforeEach((to, _from, next) => {
   const userType = authStore.user?.userType
 
   if (to.meta.requiresAuth && !isAuth) {
-    console.warn('[Router Guard] Not authenticated, redirect to login. to:', to.name)
     next({ name: 'Login', query: { redirect: to.fullPath } })
   } else if (to.meta.guest && isAuth) {
     if (userType === 'INVESTOR') {
@@ -185,7 +184,6 @@ router.beforeEach((to, _from, next) => {
       next()
     }
   } else if (to.meta.userType && userType !== to.meta.userType) {
-    console.warn('[Router Guard] User type mismatch. userType:', userType, 'required:', to.meta.userType, 'to:', to.name)
     if (userType === 'INVESTOR') {
       next({ name: 'InvestorHome' })
     } else if (userType === 'ENTREPRENEUR') {

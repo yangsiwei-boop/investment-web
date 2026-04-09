@@ -113,28 +113,20 @@ async function handleLogin() {
 
   loading.value = true
   try {
-    console.log('[Login] start login, phone:', form.phone)
     await authStore.login(form.phone, form.password)
-    console.log('[Login] login success, user:', authStore.user, 'isAuth:', authStore.isAuthenticated)
 
     ElMessage.success('登录成功')
 
     // 跳转到对应的工作台
     const redirect = route.query.redirect as string
-    console.log('[Login] redirect:', redirect, 'userType:', authStore.user?.userType)
     if (redirect) {
       await router.push(redirect)
     } else if (authStore.user?.userType === 'INVESTOR') {
-      console.log('[Login] pushing to InvestorHome')
       await router.push({ name: 'InvestorHome' })
-      console.log('[Login] push done')
     } else {
-      console.log('[Login] pushing to EntrepreneurHome')
       await router.push({ name: 'EntrepreneurHome' })
-      console.log('[Login] push done')
     }
   } catch (error: any) {
-    console.error('[Login] error:', error, error?.name, error?.message)
     // 忽略路由导航错误（如重复导航）
     if (error?.name !== 'NavigationDuplicated' && error?.name !== 'NavigationFailure') {
       ElMessage.error(error.message || '登录失败')
