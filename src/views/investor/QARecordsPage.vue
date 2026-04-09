@@ -164,8 +164,8 @@ async function loadQARecords() {
       page: currentPage.value,
       size: pageSize
     })
-    qaRecords.value = res.data.content
-    total.value = res.data.totalElements
+    qaRecords.value = res.data.content ?? []
+    total.value = res.data.totalElements ?? 0
   } catch (error) {
     console.error('Failed to load QA records:', error)
   } finally {

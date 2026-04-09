@@ -6,20 +6,20 @@
       <p>开始您的融资之旅，让更多投资人了解您的项目</p>
       <div class="stats-grid">
         <div class="stat-card">
-          <div class="label">已上传BP</div>
-          <div class="value">{{ stats.uploadedBPCount }}</div>
+          <div class="label">我的项目</div>
+          <div class="value">{{ stats.projectCount || 0 }}</div>
         </div>
         <div class="stat-card">
-          <div class="label">已生成Teaser</div>
-          <div class="value">{{ stats.generatedTeaserCount }}</div>
+          <div class="label">已发布Teaser</div>
+          <div class="value">{{ stats.publishedTeaserCount || 0 }}</div>
         </div>
         <div class="stat-card">
           <div class="label">投资人查看</div>
-          <div class="value">{{ stats.investorViewCount }}</div>
+          <div class="value">{{ stats.totalViewCount || 0 }}</div>
         </div>
         <div class="stat-card">
-          <div class="label">待完善信息</div>
-          <div class="value">{{ stats.pendingInfoCount }}</div>
+          <div class="label">待处理</div>
+          <div class="value">{{ (stats.pendingQuestionCount || 0) + (stats.pendingApplicationCount || 0) }}</div>
         </div>
       </div>
     </div>
@@ -129,11 +129,14 @@ const authStore = useAuthStore()
 
 const userName = computed(() => authStore.user?.realName || '融资用户')
 
-const stats = ref({
-  uploadedBPCount: 0,
-  generatedTeaserCount: 0,
-  investorViewCount: 0,
-  pendingInfoCount: 0
+const stats = ref<Record<string, any>>({
+  projectCount: 0,
+  publishedTeaserCount: 0,
+  totalViewCount: 0,
+  pendingQuestionCount: 0,
+  pendingApplicationCount: 0,
+  totalFavoriteCount: 0,
+  bpDownloadCount: 0
 })
 
 const businessPlans = ref<BusinessPlan[]>([])
@@ -183,11 +186,13 @@ function handlePendingItem(item: any) {
 async function loadData() {
   try {
     const statsRes = await entrepreneurApi.getEntrepreneurDashboard()
-    stats.value = statsRes.data
+    if (statsRes.data) {
+      stats.value = statsRes.data
+    }
 
     // 加载项目列表，取第一个项目的BP展示
     const projectsRes = await entrepreneurApi.getProjects({ page: 0, size: 1 })
-    const projects = projectsRes.data.content
+    const projects = projectsRes.data.content ?? []
     if (projects.length > 0) {
       const bpRes = await entrepreneurApi.getBusinessPlans(projects[0].id)
       businessPlans.value = bpRes.data.slice(0, 5) // 只显示前5个

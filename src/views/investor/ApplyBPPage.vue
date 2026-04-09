@@ -61,7 +61,6 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import * as investorApi from '@/api/investor'
-import type { Project } from '@/types'
 
 const router = useRouter()
 const route = useRoute()
@@ -69,8 +68,6 @@ const route = useRoute()
 const projectId = Number(route.params.id)
 const formRef = ref<FormInstance>()
 const submitting = ref(false)
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const project = ref<Project | null>(null)
 
 const form = reactive({
   applicationReason: '',

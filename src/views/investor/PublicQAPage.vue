@@ -51,7 +51,8 @@ import dayjs from 'dayjs'
 const router = useRouter()
 const route = useRoute()
 
-const _teaserId = Number(route.params.id) // TODO: 后续需按teaserId过滤
+// @ts-ignore - teaserId will be used for filtering when API supports it
+const teaserId = Number(route.params.id) // TODO: 后续需按teaserId过滤
 const loading = ref(false)
 const qaRecords = ref<QARecord[]>([])
 

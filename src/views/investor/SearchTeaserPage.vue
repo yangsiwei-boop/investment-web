@@ -150,8 +150,8 @@ async function loadTeasers() {
       page: currentPage.value,
       pageSize
     })
-    teasers.value = res.data.content
-    total.value = res.data.totalElements
+    teasers.value = res.data.content ?? []
+    total.value = res.data.totalElements ?? 0
   } catch (error) {
     console.error('Failed to load teasers:', error)
   } finally {

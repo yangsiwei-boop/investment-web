@@ -13,7 +13,7 @@ export const useNotificationStore = defineStore('notification', () => {
     try {
       const res = await notificationApi.getNotifications({ page, size })
       if (res.data) {
-        notifications.value = res.data.content
+        notifications.value = res.data.content ?? []
       }
     } catch (error) {
       console.error('Failed to fetch notifications:', error)

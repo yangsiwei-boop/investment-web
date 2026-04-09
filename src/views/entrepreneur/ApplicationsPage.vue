@@ -219,7 +219,7 @@ async function loadApplications() {
     const res = await entrepreneurApi.getReceivedApplications({
       status: statusFilter.value as any
     })
-    applications.value = res.data.content
+    applications.value = res.data.content ?? []
   } catch (error) {
     console.error('Failed to load applications:', error)
   } finally {

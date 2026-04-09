@@ -245,7 +245,7 @@ function viewProject() {
 async function loadProjects() {
   try {
     const res = await entrepreneurApi.getProjects({ page: 0, size: 100 })
-    projects.value = res.data.content
+    projects.value = res.data.content ?? []
   } catch (error) {
     console.error('Failed to load projects:', error)
   }

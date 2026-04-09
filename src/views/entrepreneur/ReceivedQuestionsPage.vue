@@ -228,8 +228,8 @@ async function loadQuestions() {
       page: currentPage.value,
       size: pageSize
     })
-    questions.value = res.data.content
-    total.value = res.data.totalElements
+    questions.value = res.data.content ?? []
+    total.value = res.data.totalElements ?? 0
   } catch (error) {
     console.error('Failed to load questions:', error)
   } finally {

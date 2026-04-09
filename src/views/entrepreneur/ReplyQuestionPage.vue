@@ -115,7 +115,7 @@ async function loadQuestion() {
   try {
     // 使用列表接口获取问题详情
     const res = await entrepreneurApi.getReceivedQuestions({})
-    const found = res.data.content.find(q => q.id === questionId)
+    const found = (res.data.content ?? []).find(q => q.id === questionId)
     if (found) {
       question.value = found
       // 如果已有回复，填充表单
