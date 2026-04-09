@@ -8,14 +8,14 @@
     <div class="filter-bar">
       <el-radio-group v-model="typeFilter" @change="loadApplications">
         <el-radio-button value="">全部申请</el-radio-button>
-        <el-radio-button value="get_bp">获取BP</el-radio-button>
-        <el-radio-button value="contact_company">联系企业</el-radio-button>
+        <el-radio-button value="GET_BP">获取BP</el-radio-button>
+        <el-radio-button value="CONTACT_COMPANY">联系企业</el-radio-button>
       </el-radio-group>
       <el-radio-group v-model="statusFilter" @change="loadApplications">
         <el-radio-button value="">全部状态</el-radio-button>
-        <el-radio-button value="pending">待审核</el-radio-button>
-        <el-radio-button value="approved">已通过</el-radio-button>
-        <el-radio-button value="rejected">已拒绝</el-radio-button>
+        <el-radio-button value="PENDING">待审核</el-radio-button>
+        <el-radio-button value="APPROVED">已通过</el-radio-button>
+        <el-radio-button value="REJECTED">已拒绝</el-radio-button>
       </el-radio-group>
     </div>
 
@@ -59,12 +59,12 @@
           <div class="application-time">
             申请时间: {{ formatDate(app.createdAt) }}
           </div>
-          <div class="application-actions" v-if="app.status === 'pending'">
+          <div class="application-actions" v-if="app.status === 'PENDING'">
             <el-button type="primary" @click="approveApplication(app)">通过</el-button>
             <el-button type="danger" @click="showRejectDialog(app)">拒绝</el-button>
           </div>
           <div class="reviewed-info" v-else-if="app.reviewedAt">
-            {{ app.status === 'approved' ? '审核通过' : '审核拒绝' }}:
+            {{ app.status === 'APPROVED' ? '审核通过' : '审核拒绝' }}:
             {{ formatDate(app.reviewedAt) }}
           </div>
         </div>
@@ -127,11 +127,11 @@ function formatDate(date: string): string {
 
 function getTypeLabel(type: string): string {
   switch (type) {
-    case 'get_bp':
+    case 'GET_BP':
       return '获取BP'
-    case 'contact_company':
+    case 'CONTACT_COMPANY':
       return '联系企业'
-    case 'view_contact':
+    case 'VIEW_CONTACT':
       return '查看联系方式'
     default:
       return type
@@ -140,11 +140,11 @@ function getTypeLabel(type: string): string {
 
 function getTypeTagType(type: string): 'primary' | 'success' | 'warning' | 'info' | 'danger' {
   switch (type) {
-    case 'get_bp':
+    case 'GET_BP':
       return 'success'
-    case 'contact_company':
+    case 'CONTACT_COMPANY':
       return 'warning'
-    case 'view_contact':
+    case 'VIEW_CONTACT':
       return 'info'
     default:
       return 'info'
@@ -153,13 +153,13 @@ function getTypeTagType(type: string): 'primary' | 'success' | 'warning' | 'info
 
 function getStatusType(status: string): 'primary' | 'success' | 'warning' | 'info' | 'danger' {
   switch (status) {
-    case 'pending':
+    case 'PENDING':
       return 'warning'
-    case 'approved':
+    case 'APPROVED':
       return 'success'
-    case 'rejected':
+    case 'REJECTED':
       return 'danger'
-    case 'cancelled':
+    case 'CANCELLED':
       return 'info'
     default:
       return 'info'
@@ -168,13 +168,13 @@ function getStatusType(status: string): 'primary' | 'success' | 'warning' | 'inf
 
 function getStatusLabel(status: string): string {
   switch (status) {
-    case 'pending':
+    case 'PENDING':
       return '待审核'
-    case 'approved':
+    case 'APPROVED':
       return '已通过'
-    case 'rejected':
+    case 'REJECTED':
       return '已拒绝'
-    case 'cancelled':
+    case 'CANCELLED':
       return '已取消'
     default:
       return status

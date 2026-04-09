@@ -19,8 +19,8 @@
             <div class="question-time">{{ formatDate(question.questionedAt || question.sentAt || '') }}</div>
           </div>
         </div>
-        <el-tag :type="question.status === 'pending' ? 'warning' : 'success'">
-          {{ question.status === 'pending' ? '待回复' : '已回复' }}
+        <el-tag :type="question.status === 'PENDING' ? 'warning' : 'success'">
+          {{ question.status === 'PENDING' ? '待回复' : '已回复' }}
         </el-tag>
       </div>
 

@@ -153,7 +153,7 @@ function getStatusLabel(status: string): string {
       return '已完成'
     case 'processing':
       return '生成中'
-    case 'pending':
+    case 'PENDING':
       return '待处理'
     case 'failed':
       return '失败'

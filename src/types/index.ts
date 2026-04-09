@@ -1,7 +1,7 @@
-// 用户类型
+// 用户类型（后端大写）
 export type UserType = 'INVESTOR' | 'ENTREPRENEUR' | 'ADMIN'
 
-export type UserStatus = 'active' | 'pending' | 'inactive' | 'banned'
+export type UserStatus = 'ACTIVE' | 'PENDING' | 'INACTIVE' | 'BANNED'
 
 export interface User {
   id: number
@@ -70,7 +70,7 @@ export interface Project {
   businessModel?: string
   targetMarket?: string
   competitiveAdvantage?: string
-  status: 'draft' | 'published' | 'hidden' | 'archived'
+  status: 'DRAFT' | 'PUBLISHED' | 'HIDDEN' | 'ARCHIVED'
   hasBp?: boolean
   hasTeaser?: boolean
   // 以下字段前端表单使用，后端可能不返回
@@ -114,7 +114,7 @@ export interface Teaser {
   targetMarket?: string
   competitiveAdvantage?: string
   teamIntroduction?: string
-  status: 'draft' | 'published' | 'hidden'
+  status: 'DRAFT' | 'PUBLISHED' | 'HIDDEN'
   viewCount: number
   favoriteCount: number
   matchScore?: number
@@ -159,7 +159,7 @@ export interface QARecord {
   answer?: string
   answererId?: number
   answererName?: string
-  status: 'pending' | 'answered' | 'ignored'
+  status: 'PENDING' | 'ANSWERED' | 'IGNORED'
   isPublic: boolean
   questionedAt?: string
   answeredAt?: string
@@ -181,11 +181,11 @@ export interface Application {
   projectName?: string
   applicantId?: number
   applicantName?: string
-  applicationType: 'get_bp' | 'contact_company' | 'view_contact'
+  applicationType: 'GET_BP' | 'CONTACT_COMPANY' | 'VIEW_CONTACT'
   reason?: string
   institutionName?: string
   position?: string
-  status: 'pending' | 'approved' | 'rejected' | 'cancelled'
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED'
   reviewComment?: string
   reviewerId?: number
   reviewedAt?: string
@@ -317,16 +317,22 @@ export interface ApiResponse<T = any> {
   timestamp?: string
 }
 
-// 分页响应（Spring Data标准格式）
+// 分页响应（兼容后端两种格式）
 export interface PaginatedResponse<T> {
-  content: T[]
-  totalElements: number
-  totalPages: number
-  number: number
-  size: number
-  first: boolean
-  last: boolean
-  numberOfElements: number
+  // Spring Data标准格式
+  content?: T[]
+  totalElements?: number
+  totalPages?: number
+  number?: number
+  size?: number
+  first?: boolean
+  last?: boolean
+  numberOfElements?: number
+  // Teaser列表自定义格式
+  items?: T[]
+  total?: number
+  page?: number
+  pageSize?: number
 }
 
 // Dashboard统计

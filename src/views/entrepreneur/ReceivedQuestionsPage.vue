@@ -8,9 +8,9 @@
     <div class="filter-bar">
       <el-radio-group v-model="statusFilter" @change="loadQuestions">
         <el-radio-button value="">全部</el-radio-button>
-        <el-radio-button value="pending">待回复</el-radio-button>
-        <el-radio-button value="answered">已回复</el-radio-button>
-        <el-radio-button value="ignored">已忽略</el-radio-button>
+        <el-radio-button value="PENDING">待回复</el-radio-button>
+        <el-radio-button value="ANSWERED">已回复</el-radio-button>
+        <el-radio-button value="IGNORED">已忽略</el-radio-button>
       </el-radio-group>
     </div>
 
@@ -49,14 +49,14 @@
 
         <div class="question-actions">
           <el-button
-            v-if="(question.status || question.questionStatus) === 'pending'"
+            v-if="(question.status || question.questionStatus) === 'PENDING'"
             type="primary"
             @click="replyQuestion(question)"
           >
             回复
           </el-button>
           <el-button
-            v-if="(question.status || question.questionStatus) === 'answered'"
+            v-if="(question.status || question.questionStatus) === 'ANSWERED'"
             @click="editReply(question)"
           >
             编辑回复
@@ -159,11 +159,11 @@ function formatDate(date: string): string {
 
 function getStatusType(status: string | undefined): 'primary' | 'success' | 'warning' | 'info' | 'danger' {
   switch (status) {
-    case 'pending':
+    case 'PENDING':
       return 'warning'
-    case 'answered':
+    case 'ANSWERED':
       return 'success'
-    case 'ignored':
+    case 'IGNORED':
       return 'info'
     default:
       return 'info'
@@ -172,11 +172,11 @@ function getStatusType(status: string | undefined): 'primary' | 'success' | 'war
 
 function getStatusLabel(status: string | undefined): string {
   switch (status) {
-    case 'pending':
+    case 'PENDING':
       return '待回复'
-    case 'answered':
+    case 'ANSWERED':
       return '已回复'
-    case 'ignored':
+    case 'IGNORED':
       return '已忽略'
     default:
       return status || ''

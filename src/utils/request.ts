@@ -3,6 +3,18 @@ import type { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'a
 import { ElMessage } from 'element-plus'
 import router from '@/router'
 
+// 标准化分页格式：后端Teaser接口返回items/total/page/pageSize，统一转为content/totalElements
+function normalizePagination(res: any): any {
+  if (res?.data && res.data.items && !res.data.content) {
+    res.data.content = res.data.items
+    res.data.totalElements = res.data.total
+    res.data.totalPages = res.data.totalPages
+    res.data.number = (res.data.page || 1) - 1
+    res.data.size = res.data.pageSize
+  }
+  return res
+}
+
 const service: AxiosInstance = axios.create({
   baseURL: '/api/v1',
   timeout: 15000,
@@ -112,7 +124,7 @@ service.interceptors.response.use(
       return Promise.reject(new Error(res.message || '请求失败'))
     }
 
-    return res
+    return normalizePagination(res)
   },
   (error) => {
     console.error('Response error:', error)
