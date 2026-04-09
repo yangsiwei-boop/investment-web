@@ -1,5 +1,10 @@
 <template>
   <div class="qa-records-page">
+    <div class="back-btn" @click="router.back()">
+      <el-icon><ArrowLeft /></el-icon>
+      <span>返回</span>
+    </div>
+
     <div class="page-header">
       <h1>问答记录</h1>
       <p>查看您发送的问题和收到的回复</p>
@@ -89,7 +94,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { QuestionFilled, ChatDotRound } from '@element-plus/icons-vue'
+import { ArrowLeft, QuestionFilled, ChatDotRound } from '@element-plus/icons-vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import * as investorApi from '@/api/investor'
 import type { QARecord } from '@/types'
@@ -181,6 +186,24 @@ onMounted(() => {
 <style scoped lang="scss">
 .qa-records-page {
   padding-bottom: 40px;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #6b7280;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background 0.3s;
+  margin-bottom: 24px;
+  width: fit-content;
+
+  &:hover {
+    background: #f3f4f6;
+  }
 }
 
 .page-header {

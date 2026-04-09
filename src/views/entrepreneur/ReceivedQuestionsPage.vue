@@ -1,5 +1,10 @@
 <template>
   <div class="received-questions-page">
+    <div class="back-btn" @click="router.back()">
+      <el-icon><ArrowLeft /></el-icon>
+      <span>返回</span>
+    </div>
+
     <div class="page-header">
       <h1>收到的提问</h1>
       <p>回复投资人问题，展示项目价值</p>
@@ -130,11 +135,15 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { ArrowLeft } from '@element-plus/icons-vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import * as entrepreneurApi from '@/api/entrepreneur'
 import type { QARecord } from '@/types'
 import dayjs from 'dayjs'
+
+const router = useRouter()
 
 const loading = ref(false)
 const questions = ref<QARecord[]>([])
@@ -212,6 +221,8 @@ async function submitReply() {
     await entrepreneurApi.answerQuestion(currentQuestion.value.id, replyForm.value)
     ElMessage.success('回复成功')
     replyDialogVisible.value = false
+    // 回复后重置筛选以显示最新状态
+    statusFilter.value = ''
     loadQuestions()
   } catch (error: any) {
     ElMessage.error(error.message || '回复失败')
@@ -245,6 +256,24 @@ onMounted(() => {
 <style scoped lang="scss">
 .received-questions-page {
   padding-bottom: 40px;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #6b7280;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background 0.3s;
+  margin-bottom: 24px;
+  width: fit-content;
+
+  &:hover {
+    background: #f3f4f6;
+  }
 }
 
 .page-header {

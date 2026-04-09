@@ -35,9 +35,9 @@
                 <el-icon><User /></el-icon>
                 个人资料
               </el-dropdown-item>
-              <el-dropdown-item command="settings">
-                <el-icon><Setting /></el-icon>
-                账号设置
+              <el-dropdown-item command="changepassword">
+                <el-icon><Lock /></el-icon>
+                修改密码
               </el-dropdown-item>
               <el-dropdown-item divided command="logout">
                 <el-icon><SwitchButton /></el-icon>
@@ -52,33 +52,179 @@
     <main class="main-content">
       <router-view />
     </main>
+
+    <!-- 修改密码对话框 -->
+    <el-dialog v-model="passwordDialogVisible" title="修改密码" width="460px">
+      <el-form ref="passwordFormRef" :model="passwordForm" :rules="passwordRules" label-position="top">
+        <el-form-item label="当前密码" prop="oldPassword">
+          <el-input v-model="passwordForm.oldPassword" type="password" show-password placeholder="请输入当前密码" />
+        </el-form-item>
+        <el-form-item label="新密码" prop="newPassword">
+          <el-input v-model="passwordForm.newPassword" type="password" show-password placeholder="请输入新密码（6-20位）" />
+        </el-form-item>
+        <el-form-item label="确认新密码" prop="confirmPassword">
+          <el-input v-model="passwordForm.confirmPassword" type="password" show-password placeholder="请再次输入新密码" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="passwordDialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="passwordLoading" @click="handleChangePassword">确认修改</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 个人资料对话框 -->
+    <el-dialog v-model="profileDialogVisible" title="个人资料" width="560px">
+      <el-form ref="profileFormRef" :model="profileForm" label-position="top">
+        <el-form-item label="昵称">
+          <el-input v-model="profileForm.nickname" placeholder="请输入昵称" />
+        </el-form-item>
+        <el-form-item label="邮箱">
+          <el-input v-model="profileForm.email" placeholder="请输入邮箱" />
+        </el-form-item>
+        <el-form-item label="个人简介">
+          <el-input v-model="profileForm.bio" type="textarea" :rows="3" placeholder="请输入个人简介" />
+        </el-form-item>
+        <el-form-item label="机构名称">
+          <el-input v-model="profileForm.institutionName" placeholder="请输入机构名称" />
+        </el-form-item>
+        <el-form-item label="职位">
+          <el-input v-model="profileForm.position" placeholder="请输入职位" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="profileDialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="profileLoading" @click="handleSaveProfile">保存</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessageBox } from 'element-plus'
-import { Bell, ArrowDown, User, Setting, SwitchButton } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
+import { Bell, ArrowDown, User, Lock, SwitchButton } from '@element-plus/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 import { useNotificationStore } from '@/stores/notification'
+import * as authApi from '@/api/auth'
+import * as investorApi from '@/api/investor'
 import NotificationPanel from '@/components/common/NotificationPanel.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const notificationStore = useNotificationStore()
 
-const userName = computed(() => authStore.user?.realName || '投资人')
+const userName = computed(() => authStore.user?.realName || authStore.user?.nickname || '投资人')
 const userAvatar = computed(() => authStore.investorProfile?.avatarUrl)
 const unreadCount = computed(() => notificationStore.unreadCount)
 
+// ====== 修改密码 ======
+const passwordDialogVisible = ref(false)
+const passwordFormRef = ref<FormInstance>()
+const passwordLoading = ref(false)
+const passwordForm = reactive({
+  oldPassword: '',
+  newPassword: '',
+  confirmPassword: ''
+})
+
+const passwordRules: FormRules = {
+  oldPassword: [{ required: true, message: '请输入当前密码', trigger: 'blur' }],
+  newPassword: [
+    { required: true, message: '请输入新密码', trigger: 'blur' },
+    { min: 6, max: 20, message: '密码长度为6-20位', trigger: 'blur' }
+  ],
+  confirmPassword: [
+    { required: true, message: '请确认新密码', trigger: 'blur' },
+    {
+      validator: (_rule: any, value: string, callback: (err?: Error) => void) => {
+        if (value !== passwordForm.newPassword) {
+          callback(new Error('两次输入的密码不一致'))
+        } else {
+          callback()
+        }
+      },
+      trigger: 'blur'
+    }
+  ]
+}
+
+async function handleChangePassword() {
+  if (!passwordFormRef.value) return
+  try {
+    await passwordFormRef.value.validate()
+    passwordLoading.value = true
+    await authApi.changePassword({
+      oldPassword: passwordForm.oldPassword,
+      newPassword: passwordForm.newPassword
+    })
+    ElMessage.success('密码修改成功，请重新登录')
+    passwordDialogVisible.value = false
+    authStore.logout()
+    router.push({ name: 'Login' })
+  } catch (error: any) {
+    if (error?.message) {
+      ElMessage.error(error.message)
+    }
+  } finally {
+    passwordLoading.value = false
+  }
+}
+
+// ====== 个人资料 ======
+const profileDialogVisible = ref(false)
+const profileFormRef = ref<FormInstance>()
+const profileLoading = ref(false)
+const profileForm = reactive({
+  nickname: '',
+  email: '',
+  bio: '',
+  institutionName: '',
+  position: ''
+})
+
+function openProfileDialog() {
+  profileForm.nickname = authStore.user?.nickname || ''
+  profileForm.email = authStore.user?.email || ''
+  profileForm.bio = authStore.user?.bio || ''
+  profileForm.institutionName = authStore.investorProfile?.institutionName || ''
+  profileForm.position = authStore.investorProfile?.position || ''
+  profileDialogVisible.value = true
+}
+
+async function handleSaveProfile() {
+  profileLoading.value = true
+  try {
+    await authApi.updateUserProfile({
+      nickname: profileForm.nickname,
+      email: profileForm.email,
+      bio: profileForm.bio
+    })
+    await investorApi.updateInvestorProfile({
+      institutionName: profileForm.institutionName,
+      position: profileForm.position
+    })
+    await authStore.fetchCurrentUser()
+    ElMessage.success('资料更新成功')
+    profileDialogVisible.value = false
+  } catch (error: any) {
+    ElMessage.error(error.message || '更新失败')
+  } finally {
+    profileLoading.value = false
+  }
+}
+
+// ====== 菜单命令 ======
 async function handleCommand(command: string) {
   switch (command) {
     case 'profile':
-      // TODO: 跳转到个人资料页面
+      openProfileDialog()
       break
-    case 'settings':
-      // TODO: 跳转到账号设置页面
+    case 'changepassword':
+      passwordForm.oldPassword = ''
+      passwordForm.newPassword = ''
+      passwordForm.confirmPassword = ''
+      passwordDialogVisible.value = true
       break
     case 'logout':
       try {

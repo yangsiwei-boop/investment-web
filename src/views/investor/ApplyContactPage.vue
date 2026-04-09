@@ -1,5 +1,10 @@
 <template>
   <div class="apply-contact-page">
+    <div class="back-btn" @click="router.back()">
+      <el-icon><ArrowLeft /></el-icon>
+      <span>返回</span>
+    </div>
+
     <div class="page-header">
       <h1>申请联系企业</h1>
       <p>向企业申请获取联系方式</p>
@@ -47,6 +52,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
+import { ArrowLeft } from '@element-plus/icons-vue'
 import * as investorApi from '@/api/investor'
 
 const router = useRouter()
@@ -109,6 +115,24 @@ onMounted(() => {
 <style scoped lang="scss">
 .apply-contact-page {
   padding-bottom: 40px;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #6b7280;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background 0.3s;
+  margin-bottom: 24px;
+  width: fit-content;
+
+  &:hover {
+    background: #f3f4f6;
+  }
 }
 
 .page-header {

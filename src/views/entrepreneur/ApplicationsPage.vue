@@ -1,5 +1,10 @@
 <template>
   <div class="applications-page">
+    <div class="back-btn" @click="router.back()">
+      <el-icon><ArrowLeft /></el-icon>
+      <span>返回</span>
+    </div>
+
     <div class="page-header">
       <h1>申请管理</h1>
       <p>审核投资人获取BP或联系方式的申请</p>
@@ -102,11 +107,15 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { ArrowLeft } from '@element-plus/icons-vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import * as entrepreneurApi from '@/api/entrepreneur'
 import type { Application } from '@/types'
 import dayjs from 'dayjs'
+
+const router = useRouter()
 
 const loading = ref(false)
 const applications = ref<Application[]>([])
@@ -235,6 +244,24 @@ onMounted(() => {
 <style scoped lang="scss">
 .applications-page {
   padding-bottom: 40px;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #6b7280;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background 0.3s;
+  margin-bottom: 24px;
+  width: fit-content;
+
+  &:hover {
+    background: #f3f4f6;
+  }
 }
 
 .page-header {

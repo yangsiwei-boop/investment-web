@@ -191,7 +191,7 @@ async function loadData() {
     }
 
     // 加载项目列表，取第一个项目的BP展示
-    const projectsRes = await entrepreneurApi.getProjects({ page: 0, size: 1 })
+    const projectsRes = await entrepreneurApi.getProjects({ page: 1, size: 1 })
     const projects = projectsRes.data.content ?? []
     if (projects.length > 0) {
       const bpRes = await entrepreneurApi.getBusinessPlans(projects[0].id)

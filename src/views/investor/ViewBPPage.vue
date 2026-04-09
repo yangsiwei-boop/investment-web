@@ -1,5 +1,10 @@
 <template>
   <div class="view-bp-page">
+    <div class="back-btn" @click="router.back()">
+      <el-icon><ArrowLeft /></el-icon>
+      <span>返回</span>
+    </div>
+
     <div class="page-header">
       <h1>商业计划书</h1>
       <p>您已获得查看商业计划书的权限</p>
@@ -38,7 +43,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Download } from '@element-plus/icons-vue'
+import { ArrowLeft, Download } from '@element-plus/icons-vue'
 import * as investorApi from '@/api/investor'
 
 const router = useRouter()
@@ -78,6 +83,24 @@ onMounted(() => {
 <style scoped lang="scss">
 .view-bp-page {
   padding-bottom: 40px;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #6b7280;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background 0.3s;
+  margin-bottom: 24px;
+  width: fit-content;
+
+  &:hover {
+    background: #f3f4f6;
+  }
 }
 
 .page-header {

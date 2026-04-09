@@ -1,5 +1,10 @@
 <template>
   <div class="privacy-settings-page">
+    <div class="back-btn" @click="router.back()">
+      <el-icon><ArrowLeft /></el-icon>
+      <span>返回</span>
+    </div>
+
     <div class="page-header">
       <h1>隐私设置</h1>
       <p>控制项目信息的公开程度，保护企业隐私</p>
@@ -184,10 +189,13 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { ArrowLeft } from '@element-plus/icons-vue'
 import * as entrepreneurApi from '@/api/entrepreneur'
 import type { PrivacySettings } from '@/types'
 
+const router = useRouter()
 const settings = ref<PrivacySettings | null>(null)
 const saving = ref(false)
 
@@ -222,6 +230,24 @@ onMounted(() => {
 <style scoped lang="scss">
 .privacy-settings-page {
   padding-bottom: 40px;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #6b7280;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background 0.3s;
+  margin-bottom: 24px;
+  width: fit-content;
+
+  &:hover {
+    background: #f3f4f6;
+  }
 }
 
 .page-header {

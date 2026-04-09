@@ -170,12 +170,13 @@ const router = createRouter({
 // 路由守卫
 router.beforeEach((to, _from, next) => {
   const authStore = useAuthStore()
+  const isAuth = authStore.isAuthenticated
+  const userType = authStore.user?.userType
 
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+  if (to.meta.requiresAuth && !isAuth) {
+    console.warn('[Router Guard] Not authenticated, redirect to login. to:', to.name)
     next({ name: 'Login', query: { redirect: to.fullPath } })
-  } else if (to.meta.guest && authStore.isAuthenticated) {
-    // 已登录用户不能访问guest页面
-    const userType = authStore.user?.userType
+  } else if (to.meta.guest && isAuth) {
     if (userType === 'INVESTOR') {
       next({ name: 'InvestorHome' })
     } else if (userType === 'ENTREPRENEUR') {
@@ -183,9 +184,8 @@ router.beforeEach((to, _from, next) => {
     } else {
       next()
     }
-  } else if (to.meta.userType && authStore.user?.userType !== to.meta.userType) {
-    // 用户类型不匹配
-    const userType = authStore.user?.userType
+  } else if (to.meta.userType && userType !== to.meta.userType) {
+    console.warn('[Router Guard] User type mismatch. userType:', userType, 'required:', to.meta.userType, 'to:', to.name)
     if (userType === 'INVESTOR') {
       next({ name: 'InvestorHome' })
     } else if (userType === 'ENTREPRENEUR') {

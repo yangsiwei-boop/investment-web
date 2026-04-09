@@ -1,5 +1,10 @@
 <template>
   <div class="question-library-page">
+    <div class="back-btn" @click="router.back()">
+      <el-icon><ArrowLeft /></el-icon>
+      <span>返回</span>
+    </div>
+
     <div class="page-header">
       <h1>问题库</h1>
       <p>管理您的常用问题，快速向企业发送询问</p>
@@ -115,11 +120,14 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
-import { Search, Plus } from '@element-plus/icons-vue'
+import { ArrowLeft, Search, Plus } from '@element-plus/icons-vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import * as questionApi from '@/api/question'
 import type { QuestionLibraryItem } from '@/api/question'
+
+const router = useRouter()
 
 const searchKeyword = ref('')
 const selectedCategory = ref('')
@@ -287,6 +295,24 @@ onMounted(() => {
 <style scoped lang="scss">
 .question-library-page {
   padding-bottom: 40px;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #6b7280;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background 0.3s;
+  margin-bottom: 24px;
+  width: fit-content;
+
+  &:hover {
+    background: #f3f4f6;
+  }
 }
 
 .page-header {

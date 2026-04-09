@@ -1,5 +1,10 @@
 <template>
   <div class="edit-project-page">
+    <div class="back-btn" @click="router.back()">
+      <el-icon><ArrowLeft /></el-icon>
+      <span>返回</span>
+    </div>
+
     <div class="page-header">
       <h1>{{ isEdit ? '编辑项目' : '创建项目' }}</h1>
       <p>完善项目信息，让投资人更好地了解您的企业</p>
@@ -240,6 +245,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
+import { ArrowLeft } from '@element-plus/icons-vue'
 import * as entrepreneurApi from '@/api/entrepreneur'
 import type { Project } from '@/types'
 
@@ -365,6 +371,24 @@ onMounted(() => {
 <style scoped lang="scss">
 .edit-project-page {
   padding-bottom: 40px;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #6b7280;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background 0.3s;
+  margin-bottom: 24px;
+  width: fit-content;
+
+  &:hover {
+    background: #f3f4f6;
+  }
 }
 
 .page-header {
