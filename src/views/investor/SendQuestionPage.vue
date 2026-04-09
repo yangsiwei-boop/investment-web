@@ -233,11 +233,11 @@ async function loadProject() {
 async function loadQuestions() {
   try {
     const [templates, library] = await Promise.all([
-      questionApi.getTemplateQuestions(),
-      questionApi.getQuestionLibrary()
+      questionApi.getTemplateQuestions().catch(() => ({ data: [] as any[] })),
+      questionApi.getQuestionLibrary().catch(() => ({ data: [] as any[] }))
     ])
-    templateQuestions.value = templates.data
-    libraryQuestions.value = library.data
+    templateQuestions.value = templates.data || []
+    libraryQuestions.value = library.data || []
   } catch (error) {
     console.error('Failed to load questions:', error)
   }

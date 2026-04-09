@@ -53,8 +53,30 @@
       </div>
     </div>
 
+    <!-- 快捷操作 -->
+    <div class="action-cards">
+      <div class="action-card" @click="router.push({ name: 'InvestorSearch' })">
+        <div class="icon">🔍</div>
+        <h3>搜索项目</h3>
+        <p>浏览融资中的项目Teaser，发现投资机会</p>
+        <div class="btn">去搜索</div>
+      </div>
+      <div class="action-card" @click="router.push({ name: 'InvestorQA' })">
+        <div class="icon">💬</div>
+        <h3>我的提问</h3>
+        <p>查看已发送的问题和收到的企业回复</p>
+        <div class="btn">查看问答</div>
+      </div>
+      <div class="action-card" @click="router.push({ name: 'InvestorSearch' })">
+        <div class="icon">📊</div>
+        <h3>投资分析</h3>
+        <p>使用AI分析工具评估项目投资价值</p>
+        <div class="btn">去分析</div>
+      </div>
+    </div>
+
     <!-- 推荐项目 -->
-    <div class="section">
+    <div class="section" style="margin-bottom: 0;">
       <div class="section-header">
         <h3>📊 推荐项目</h3>
         <router-link to="/investor/search" class="view-all">
@@ -298,6 +320,63 @@ onMounted(() => {
   border-radius: 16px;
   padding: 28px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  margin-bottom: 32px;
+}
+
+.action-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.action-card {
+  background: white;
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+  }
+
+  .icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+  }
+
+  h3 {
+    color: #374151;
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  p {
+    color: #6b7280;
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+
+  .btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s;
+  }
+
+  &:hover .btn {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(102, 126, 234, 0.3);
+  }
 }
 
 .section-header {

@@ -198,6 +198,14 @@ export function getQADetail(qaId: number): Promise<ApiResponse<QARecord>> {
   return request.get(`/investor/qa/${qaId}`)
 }
 
+// 追问/追加消息
+export function replyToQA(qaId: number, data: {
+  content: string
+  isPublic?: boolean
+}): Promise<ApiResponse<QARecord>> {
+  return request.post(`/investor/qa/${qaId}/reply`, data)
+}
+
 // ========== 投资人申请 ==========
 
 // 获取申请列表

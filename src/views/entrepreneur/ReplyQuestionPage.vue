@@ -10,69 +10,86 @@
       <p>回复投资人的提问</p>
     </div>
 
-    <div class="question-card" v-if="question">
-      <div class="question-header">
-        <div class="investor-info">
-          <el-avatar :size="40">{{ (question.questionerName || question.investorName)?.charAt(0) || '投' }}</el-avatar>
-          <div class="investor-detail">
-            <div class="investor-name">{{ question.questionerName || question.investorName || '投资人' }}</div>
-            <div class="question-time">{{ formatDate(question.questionedAt || question.sentAt || '') }}</div>
+    <template v-if="question">
+      <div class="question-card">
+        <div class="question-header">
+          <div class="investor-info">
+            <el-avatar :size="40">{{ (question.questionerName || question.investorName)?.charAt(0) || '投' }}</el-avatar>
+            <div class="investor-detail">
+              <div class="investor-name">{{ question.questionerName || question.investorName || '投资人' }}</div>
+              <div class="question-time">{{ formatDate(question.questionedAt || question.sentAt || question.createdAt || '') }}</div>
+            </div>
           </div>
+          <el-tag :type="question.status === 'PENDING' ? 'warning' : 'success'">
+            {{ question.status === 'PENDING' ? '待回复' : '已回复' }}
+          </el-tag>
         </div>
-        <el-tag :type="question.status === 'PENDING' ? 'warning' : 'success'">
-          {{ question.status === 'PENDING' ? '待回复' : '已回复' }}
-        </el-tag>
+
+        <div class="question-content">
+          <div class="question-title">{{ question.questionTitle || question.question }}</div>
+          <div class="question-text">{{ question.question }}</div>
+        </div>
       </div>
 
-      <div class="question-content">
-        <div class="question-title">{{ question.questionTitle || question.question }}</div>
-        <div class="question-text">{{ question.question }}</div>
+      <div class="conversation" v-if="question.replies && question.replies.length > 0">
+        <div
+          v-for="reply in question.replies"
+          :key="reply.id"
+          class="chat-bubble"
+          :class="reply.userType === 'ENTREPRENEUR' ? 'own' : 'other'"
+        >
+          <div class="bubble-header">
+            <span class="bubble-name">{{ reply.userName }}</span>
+            <span class="bubble-time">{{ formatDate(reply.createdAt) }}</span>
+          </div>
+          <div class="bubble-content">{{ reply.content }}</div>
+        </div>
       </div>
-    </div>
 
-    <div class="reply-form" v-if="question">
-      <el-form
-        ref="formRef"
-        :model="form"
-        :rules="rules"
-        label-position="top"
-      >
-        <el-form-item prop="answer" label="您的回复">
-          <el-input
-            v-model="form.answer"
-            type="textarea"
-            :rows="8"
-            placeholder="请输入您的回复内容..."
-            maxlength="2000"
-            show-word-limit
-          />
-        </el-form-item>
+      <div class="reply-form">
+        <el-form
+          ref="formRef"
+          :model="form"
+          :rules="rules"
+          label-position="top"
+        >
+          <el-form-item prop="answer" label="您的回复">
+            <el-input
+              v-model="form.answer"
+              type="textarea"
+              :rows="8"
+              placeholder="请输入您的回复内容..."
+              maxlength="2000"
+              show-word-limit
+            />
+          </el-form-item>
 
-        <el-form-item label="隐私设置">
-          <el-radio-group v-model="form.isPublic">
-            <el-radio :value="false">
-              <div class="radio-option">
-                <div class="radio-label">仅提问者可见</div>
-                <div class="radio-desc">只有提问的投资人可以看到您的回复</div>
-              </div>
-            </el-radio>
-            <el-radio :value="true">
-              <div class="radio-option">
-                <div class="radio-label">公开回复</div>
-                <div class="radio-desc">所有投资人都可以看到此问答</div>
-              </div>
-            </el-radio>
-          </el-radio-group>
-        </el-form-item>
-      </el-form>
+          <el-form-item label="隐私设置">
+            <el-radio-group v-model="form.isPublic">
+              <el-radio :value="false">
+                <div class="radio-option">
+                  <div class="radio-label">仅提问者可见</div>
+                  <div class="radio-desc">只有提问的投资人可以看到您的回复</div>
+                </div>
+              </el-radio>
+              <el-radio :value="true">
+                <div class="radio-option">
+                  <div class="radio-label">公开回复</div>
+                  <div class="radio-desc">所有投资人都可以看到此问答</div>
+                </div>
+              </el-radio>
+            </el-radio-group>
+          </el-form-item>
+        </el-form>
 
-      <div class="form-actions">
-        <el-button size="large" @click="router.back()">取消</el-button>
-        <el-button type="primary" size="large" :loading="submitting" @click="handleSubmit">
-          发送回复
-        </el-button>
+        <div class="form-actions">
+          <el-button size="large" @click="router.back()">取消</el-button>
+          <el-button type="primary" size="large" :loading="submitting" @click="handleSubmit">
+            发送回复
+          </el-button>
+        </div>
       </div>
-    </div>
+    </template>
 
     <el-skeleton v-else :rows="10" animated />
   </div>
@@ -113,19 +130,8 @@ function formatDate(date: string): string {
 
 async function loadQuestion() {
   try {
-    // 使用列表接口获取问题详情
-    const res = await entrepreneurApi.getReceivedQuestions({})
-    const found = (res.data.content ?? []).find(q => q.id === questionId)
-    if (found) {
-      question.value = found
-      // 如果已有回复，填充表单
-      if (found.answer) {
-        form.answer = found.answer
-      }
-    } else {
-      ElMessage.error('问题不存在')
-      router.back()
-    }
+    const res = await entrepreneurApi.getQuestionDetail(questionId)
+    question.value = res.data
   } catch (error) {
     ElMessage.error('加载问题失败')
     router.back()
@@ -145,7 +151,9 @@ async function handleSubmit() {
     })
 
     ElMessage.success('回复成功')
-    router.back()
+    // 重新加载问题以获取最新回复
+    form.answer = ''
+    await loadQuestion()
   } catch (error: any) {
     ElMessage.error(error.message || '回复失败')
   } finally {
@@ -246,6 +254,64 @@ onMounted(() => {
     background: #f9fafb;
     padding: 16px;
     border-radius: 12px;
+  }
+}
+
+.conversation {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 20px;
+  max-height: 400px;
+  overflow-y: auto;
+  margin-bottom: 20px;
+}
+
+.chat-bubble {
+  max-width: 75%;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  border-radius: 12px;
+
+  &.own {
+    margin-left: auto;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+
+    .bubble-name {
+      color: #2563eb;
+    }
+  }
+
+  &.other {
+    margin-right: auto;
+    background: white;
+    border: 1px solid #e5e7eb;
+
+    .bubble-name {
+      color: #6b7280;
+    }
+  }
+
+  .bubble-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+
+    .bubble-name {
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .bubble-time {
+      font-size: 11px;
+      color: #9ca3af;
+    }
+  }
+
+  .bubble-content {
+    font-size: 14px;
+    color: #374151;
+    line-height: 1.6;
   }
 }
 

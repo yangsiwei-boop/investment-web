@@ -43,12 +43,24 @@
             </div>
           </div>
 
-          <div class="answer-text" v-if="question.answer">
+          <div class="answer-text" v-if="question.answer && (!question.replies || question.replies.length === 0)">
             <div class="label">我的回复</div>
             <div class="text">{{ question.answer }}</div>
             <div class="public-badge" v-if="question.isPublic">
               <el-tag type="success" size="small">公开问答</el-tag>
             </div>
+          </div>
+        </div>
+
+        <div class="conversation-thread" v-if="question.replies && question.replies.length > 0">
+          <div v-for="reply in question.replies" :key="reply.id"
+               class="reply-bubble"
+               :class="reply.userType === 'ENTREPRENEUR' ? 'own' : 'other'">
+            <div class="reply-header">
+              <span class="reply-name">{{ reply.userName }}</span>
+              <span class="reply-time">{{ formatDate(reply.createdAt) }}</span>
+            </div>
+            <div class="reply-content">{{ reply.content }}</div>
           </div>
         </div>
 
@@ -381,6 +393,58 @@ onMounted(() => {
 
 .public-badge {
   margin-top: 8px;
+}
+
+.conversation-thread {
+  margin: 16px 0;
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 12px;
+
+  .reply-bubble {
+    max-width: 80%;
+    margin-bottom: 12px;
+    padding: 12px 16px;
+    border-radius: 12px;
+
+    &.own {
+      margin-left: auto;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+
+      .reply-name { color: #2563eb; }
+    }
+
+    &.other {
+      margin-right: auto;
+      background: white;
+      border: 1px solid #e5e7eb;
+
+      .reply-name { color: #6b7280; }
+    }
+
+    .reply-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+
+      .reply-name {
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .reply-time {
+        font-size: 11px;
+        color: #9ca3af;
+      }
+    }
+
+    .reply-content {
+      font-size: 14px;
+      color: #374151;
+      line-height: 1.6;
+    }
+  }
 }
 
 .question-actions {

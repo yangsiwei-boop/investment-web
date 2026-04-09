@@ -11,21 +11,35 @@
     </div>
 
     <div class="qa-list" v-if="qaRecords.length > 0">
-      <div v-for="record in qaRecords" :key="record.id" class="qa-item">
-        <div class="question">
-          <div class="qa-header">
-            <span class="qa-label">Q</span>
-            <span class="qa-user">投资人 · {{ formatDate(record.sentAt) }}</span>
-          </div>
-          <div class="qa-content">{{ record.question }}</div>
+      <div v-for="record in qaRecords" :key="record.id" class="qa-conversation">
+        <div class="conv-header">
+          <span class="conv-project">{{ record.teaserTitle || record.projectName }}</span>
+          <span class="conv-time">{{ formatDate(record.questionedAt || record.createdAt) }}</span>
         </div>
 
-        <div class="answer" v-if="record.answer">
-          <div class="qa-header">
-            <span class="qa-label answer-label">A</span>
-            <span class="qa-user">企业回复 · {{ formatDate(record.answeredAt!) }}</span>
+        <div class="conv-thread" v-if="record.replies && record.replies.length > 0">
+          <div
+            v-for="reply in record.replies"
+            :key="reply.id"
+            class="chat-bubble"
+            :class="reply.userType === 'INVESTOR' ? 'left' : 'right'"
+          >
+            <div class="bubble-meta">
+              <span class="bubble-name">{{ reply.userName }}</span>
+              <span class="bubble-time">{{ formatDate(reply.createdAt) }}</span>
+            </div>
+            <div class="bubble-text">{{ reply.content }}</div>
           </div>
-          <div class="qa-content">{{ record.answer }}</div>
+        </div>
+
+        <!-- Fallback: if no replies but has question/answer -->
+        <div v-else class="simple-qa">
+          <div class="qa-q">
+            <strong>问：</strong>{{ record.question }}
+          </div>
+          <div class="qa-a" v-if="record.answer">
+            <strong>答：</strong>{{ record.answer }}
+          </div>
         </div>
       </div>
     </div>
@@ -120,58 +134,109 @@ onMounted(() => {
 .qa-list {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
 }
 
-.qa-item {
+.qa-conversation {
   background: white;
   border-radius: 16px;
   padding: 24px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-}
+  margin-bottom: 16px;
 
-.question,
-.answer {
-  margin-bottom: 20px;
+  .conv-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f3f4f6;
 
-  &:last-child {
-    margin-bottom: 0;
+    .conv-project {
+      font-size: 16px;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .conv-time {
+      font-size: 13px;
+      color: #9ca3af;
+    }
   }
 }
 
-.qa-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
+.conv-thread {
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 12px;
+
+  .chat-bubble {
+    max-width: 75%;
+    margin-bottom: 16px;
+    padding: 12px 16px;
+    border-radius: 12px;
+
+    &.left {
+      margin-right: auto;
+      background: white;
+      border: 1px solid #e5e7eb;
+
+      .bubble-name {
+        color: #6b7280;
+      }
+    }
+
+    &.right {
+      margin-left: auto;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+
+      .bubble-name {
+        color: #2563eb;
+      }
+    }
+
+    .bubble-meta {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+
+      .bubble-name {
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .bubble-time {
+        font-size: 11px;
+        color: #9ca3af;
+      }
+    }
+
+    .bubble-text {
+      font-size: 14px;
+      color: #374151;
+      line-height: 1.6;
+    }
+  }
 }
 
-.qa-label {
-  width: 28px;
-  height: 28px;
-  background: #667eea;
-  color: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  font-weight: 700;
-}
+.simple-qa {
+  .qa-q,
+  .qa-a {
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+  }
 
-.answer-label {
-  background: #10b981;
-}
+  .qa-q {
+    background: #f9fafb;
+    color: #374151;
+  }
 
-.qa-user {
-  font-size: 13px;
-  color: #6b7280;
-}
-
-.qa-content {
-  font-size: 15px;
-  color: #374151;
-  line-height: 1.8;
-  padding-left: 40px;
+  .qa-a {
+    background: #ecfdf5;
+    color: #374151;
+  }
 }
 </style>

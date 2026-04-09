@@ -147,6 +147,18 @@ export interface BusinessPlan {
 }
 
 // 问答记录
+// 问答回复（多轮对话）
+export interface QaReply {
+  id: number
+  qaRecordId: number
+  userId: number
+  userName: string
+  userType: 'INVESTOR' | 'ENTREPRENEUR'
+  content: string
+  isPublic: boolean
+  createdAt: string
+}
+
 export interface QARecord {
   id: number
   teaserId: number
@@ -159,17 +171,19 @@ export interface QARecord {
   answer?: string
   answererId?: number
   answererName?: string
-  status: 'PENDING' | 'ANSWERED' | 'IGNORED'
+  status: 'PENDING' | 'ANSWERED' | 'IGNORED' | 'WITHDRAWN'
   isPublic: boolean
   questionedAt?: string
   answeredAt?: string
+  replyCount?: number
+  replies?: QaReply[]
   createdAt: string
   // 前端兼容旧字段
   projectId?: number
   investorName?: string
   investorMessage?: string
   questionTitle?: string
-  questionStatus?: 'pending' | 'answered' | 'ignored'
+  questionStatus?: string
   sentAt?: string
 }
 

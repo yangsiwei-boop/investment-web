@@ -58,13 +58,42 @@
           </div>
         </div>
 
+        <!-- Conversation thread with multi-round replies -->
+        <div class="conversation-thread" v-if="record.replies && record.replies.length > 0">
+          <div
+            v-for="reply in record.replies"
+            :key="reply.id"
+            class="reply-bubble"
+            :class="reply.userType === 'INVESTOR' ? 'own' : 'other'"
+          >
+            <div class="reply-header">
+              <span class="reply-name">{{ reply.userName }}</span>
+              <span class="reply-time">{{ formatDate(reply.createdAt) }}</span>
+            </div>
+            <div class="reply-content">{{ reply.content }}</div>
+          </div>
+        </div>
+
+        <!-- Inline follow-up input -->
+        <div class="follow-up-input">
+          <el-input
+            v-model="followUpTexts[record.id] || ''"
+            placeholder="输入追问内容..."
+            size="small"
+            @keyup.enter="sendFollowUp(record)"
+          >
+            <template #append>
+              <el-button @click="sendFollowUp(record)" :loading="sendingFollowUp === record.id">
+                发送
+              </el-button>
+            </template>
+          </el-input>
+        </div>
+
         <div class="qa-actions">
           <el-button size="small" @click="viewProject(record.projectId || record.teaserId)">查看项目</el-button>
           <el-button size="small" v-if="record.answer && record.isPublic" @click="viewPublicQA(record)">
             查看公开问答
-          </el-button>
-          <el-button size="small" v-if="!record.answer" @click="sendFollowUp(record)">
-            追问
           </el-button>
         </div>
       </div>
@@ -94,6 +123,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import { ArrowLeft, QuestionFilled, ChatDotRound } from '@element-plus/icons-vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import * as investorApi from '@/api/investor'
@@ -108,6 +138,10 @@ const currentPage = ref(1)
 const pageSize = 10
 const total = ref(0)
 const statusFilter = ref('')
+
+// Multi-round conversation state
+const followUpTexts = ref<Record<number, string>>({})
+const sendingFollowUp = ref<number | null>(null)
 
 const projectNames: Record<number, string> = {}
 
@@ -155,11 +189,20 @@ function viewPublicQA(record: QARecord) {
   router.push({ name: 'PublicQA', params: { id: record.id } })
 }
 
-function sendFollowUp(record: QARecord) {
-  router.push({
-    name: 'SendQuestion',
-    params: { id: record.projectId || record.teaserId }
-  })
+async function sendFollowUp(record: QARecord) {
+  const text = followUpTexts.value[record.id]?.trim()
+  if (!text) return
+  sendingFollowUp.value = record.id
+  try {
+    await investorApi.replyToQA(record.id, { content: text, isPublic: true })
+    ElMessage.success('追问已发送')
+    followUpTexts.value[record.id] = ''
+    loadQARecords()
+  } catch (error: any) {
+    ElMessage.error(error.message || '发送失败')
+  } finally {
+    sendingFollowUp.value = null
+  }
 }
 
 async function loadQARecords() {
@@ -324,6 +367,66 @@ onMounted(() => {
 
 .public-tag {
   margin-top: 8px;
+}
+
+.conversation-thread {
+  margin: 16px 0;
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 12px;
+
+  .reply-bubble {
+    max-width: 80%;
+    margin-bottom: 12px;
+    padding: 12px 16px;
+    border-radius: 12px;
+
+    &.own {
+      margin-left: auto;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+
+      .reply-name {
+        color: #2563eb;
+      }
+    }
+
+    &.other {
+      margin-right: auto;
+      background: white;
+      border: 1px solid #e5e7eb;
+
+      .reply-name {
+        color: #6b7280;
+      }
+    }
+
+    .reply-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+
+      .reply-name {
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .reply-time {
+        font-size: 11px;
+        color: #9ca3af;
+      }
+    }
+
+    .reply-content {
+      font-size: 14px;
+      color: #374151;
+      line-height: 1.6;
+    }
+  }
+}
+
+.follow-up-input {
+  margin-top: 12px;
 }
 
 .qa-actions {
