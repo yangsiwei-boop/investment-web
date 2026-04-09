@@ -141,10 +141,18 @@ const stats = ref<Record<string, any>>({
 
 const businessPlans = ref<BusinessPlan[]>([])
 
-const pendingItems = ref([
-  { id: 1, icon: '❓', title: '3个待回复问题', description: '投资人向您发送了问题', actionText: '去回复', route: 'ReceivedQuestions' },
-  { id: 2, icon: '📋', title: '2个待审核申请', description: '投资人申请获取BP或联系方式', actionText: '去审核', route: 'EntrepreneurApplications' }
-])
+const pendingItems = computed(() => {
+  const items = []
+  const pendingQ = stats.value.pendingQuestionCount || 0
+  const pendingA = stats.value.pendingApplicationCount || 0
+  if (pendingQ > 0) {
+    items.push({ id: 1, icon: '❓', title: `${pendingQ}个待回复问题`, description: '投资人向您发送了问题', actionText: '去回复', route: 'ReceivedQuestions' })
+  }
+  if (pendingA > 0) {
+    items.push({ id: 2, icon: '📋', title: `${pendingA}个待审核申请`, description: '投资人申请获取BP或联系方式', actionText: '去审核', route: 'EntrepreneurApplications' })
+  }
+  return items
+})
 
 function formatDate(date: string): string {
   return new Date(date).toLocaleDateString('zh-CN')

@@ -218,12 +218,16 @@ async function submitReply() {
 
   saving.value = true
   try {
-    await entrepreneurApi.answerQuestion(currentQuestion.value.id, replyForm.value)
+    const res = await entrepreneurApi.answerQuestion(currentQuestion.value.id, replyForm.value)
     ElMessage.success('回复成功')
     replyDialogVisible.value = false
-    // 回复后重置筛选以显示最新状态
-    statusFilter.value = ''
-    loadQuestions()
+    // 用API返回的数据直接更新本地列表，确保立即可见
+    if (currentQuestion.value && res.data) {
+      const idx = questions.value.findIndex(q => q.id === currentQuestion.value!.id)
+      if (idx !== -1) {
+        questions.value[idx] = res.data
+      }
+    }
   } catch (error: any) {
     ElMessage.error(error.message || '回复失败')
   } finally {
