@@ -103,7 +103,7 @@ async function loadTeaser() {
   if (!id) return
 
   try {
-    const res = await entrepreneurApi.previewTeaser(id)
+    const res = await entrepreneurApi.getTeaserDetail(id)
     teaser.value = res.data
   } catch (error) {
     ElMessage.error('加载失败')

@@ -23,13 +23,13 @@
       <div v-for="app in applications" :key="app.id" class="application-item">
         <div class="application-header">
           <div class="investor-info">
-            <el-avatar :size="48">{{ app.investorName?.charAt(0) || '投' }}</el-avatar>
+            <el-avatar :size="48">{{ app.applicantName?.charAt(0) || '投' }}</el-avatar>
             <div class="investor-details">
-              <div class="investor-name">{{ app.investorName || '投资人' }}</div>
+              <div class="investor-name">{{ app.applicantName || '投资人' }}</div>
               <div class="investor-meta">
-                <span class="institution">{{ app.investorInstitution || '独立投资人' }}</span>
+                <span class="institution">{{ app.institutionName || '独立投资人' }}</span>
                 <span class="divider">·</span>
-                <span class="position">{{ app.investorPosition || '' }}</span>
+                <span class="position">{{ app.position || '' }}</span>
               </div>
             </div>
           </div>
@@ -37,26 +37,21 @@
             <el-tag :type="getTypeTagType(app.applicationType)" size="small">
               {{ getTypeLabel(app.applicationType) }}
             </el-tag>
-            <el-tag :type="getStatusType(app.applicationStatus)" size="small" class="ml-2">
-              {{ getStatusLabel(app.applicationStatus) }}
+            <el-tag :type="getStatusType(app.status)" size="small" class="ml-2">
+              {{ getStatusLabel(app.status) }}
             </el-tag>
           </div>
         </div>
 
         <div class="application-content">
-          <div class="application-reason" v-if="app.applicationReason">
+          <div class="application-reason" v-if="app.reason">
             <div class="label">申请理由</div>
-            <div class="text">{{ app.applicationReason }}</div>
+            <div class="text">{{ app.reason }}</div>
           </div>
 
-          <div class="contact-info" v-if="app.contactInfo">
-            <div class="label">联系方式</div>
-            <div class="text">{{ app.contactInfo }}</div>
-          </div>
-
-          <div class="rejection-reason" v-if="app.rejectionReason">
+          <div class="rejection-reason" v-if="app.reviewComment">
             <div class="label">拒绝原因</div>
-            <div class="text">{{ app.rejectionReason }}</div>
+            <div class="text">{{ app.reviewComment }}</div>
           </div>
         </div>
 
@@ -64,12 +59,12 @@
           <div class="application-time">
             申请时间: {{ formatDate(app.createdAt) }}
           </div>
-          <div class="application-actions" v-if="app.applicationStatus === 'pending'">
+          <div class="application-actions" v-if="app.status === 'pending'">
             <el-button type="primary" @click="approveApplication(app)">通过</el-button>
             <el-button type="danger" @click="showRejectDialog(app)">拒绝</el-button>
           </div>
           <div class="reviewed-info" v-else-if="app.reviewedAt">
-            {{ app.applicationStatus === 'approved' ? '审核通过' : '审核拒绝' }}:
+            {{ app.status === 'approved' ? '审核通过' : '审核拒绝' }}:
             {{ formatDate(app.reviewedAt) }}
           </div>
         </div>
@@ -143,7 +138,7 @@ function getTypeLabel(type: string): string {
   }
 }
 
-function getTypeTagType(type: string): '' | 'success' | 'warning' | 'info' | 'danger' {
+function getTypeTagType(type: string): 'primary' | 'success' | 'warning' | 'info' | 'danger' {
   switch (type) {
     case 'get_bp':
       return 'success'
@@ -152,11 +147,11 @@ function getTypeTagType(type: string): '' | 'success' | 'warning' | 'info' | 'da
     case 'view_contact':
       return 'info'
     default:
-      return ''
+      return 'info'
   }
 }
 
-function getStatusType(status: string) {
+function getStatusType(status: string): 'primary' | 'success' | 'warning' | 'info' | 'danger' {
   switch (status) {
     case 'pending':
       return 'warning'
@@ -167,7 +162,7 @@ function getStatusType(status: string) {
     case 'cancelled':
       return 'info'
     default:
-      return ''
+      return 'info'
   }
 }
 
@@ -188,7 +183,7 @@ function getStatusLabel(status: string): string {
 
 async function approveApplication(app: Application) {
   try {
-    await entrepreneurApi.reviewApplication(app.id, { status: 'approved' })
+    await entrepreneurApi.reviewApplication(app.id, true)
     ElMessage.success('已通过申请')
     loadApplications()
   } catch (error: any) {
@@ -207,10 +202,7 @@ async function rejectApplication() {
 
   rejecting.value = true
   try {
-    await entrepreneurApi.reviewApplication(currentApplication.value.id, {
-      status: 'rejected',
-      rejectionReason: rejectForm.value.rejectionReason
-    })
+    await entrepreneurApi.reviewApplication(currentApplication.value.id, false, rejectForm.value.rejectionReason)
     ElMessage.success('已拒绝申请')
     rejectDialogVisible.value = false
     loadApplications()
@@ -225,10 +217,9 @@ async function loadApplications() {
   loading.value = true
   try {
     const res = await entrepreneurApi.getReceivedApplications({
-      type: typeFilter.value as any,
       status: statusFilter.value as any
     })
-    applications.value = res.data.items || res.data
+    applications.value = res.data.content
   } catch (error) {
     console.error('Failed to load applications:', error)
   } finally {

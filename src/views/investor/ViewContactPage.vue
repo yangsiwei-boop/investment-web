@@ -49,7 +49,8 @@ const contactInfo = ref<any>(null)
 
 async function loadContactInfo() {
   try {
-    const res = await investorApi.getContactInfo(applicationId)
+    // TODO: getContactInfo 接口已移除，暂使用 getApplicationDetail 替代
+    const res = await investorApi.getApplicationDetail(applicationId)
     contactInfo.value = res.data
   } catch (error) {
     ElMessage.error('加载失败')

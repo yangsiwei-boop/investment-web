@@ -21,7 +21,7 @@
     </div>
 
     <div class="card-title">{{ teaser.title }}</div>
-    <div class="card-desc">{{ teaser.subtitle || teaser.aiSummary }}</div>
+    <div class="card-desc">{{ teaser.summary }}</div>
 
     <div class="card-tags">
       <span v-for="tag in displayTags" :key="tag" class="tag">{{ tag }}</span>

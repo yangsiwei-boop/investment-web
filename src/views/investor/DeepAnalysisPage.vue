@@ -79,7 +79,7 @@ async function loadData() {
     teaser.value = teaserRes.data
 
     try {
-      const analysisRes = await investorApi.getAnalysisResult(teaserId)
+      const analysisRes = await investorApi.getTeaserAnalysis(teaserId)
       analysis.value = analysisRes.data
     } catch {
       await generateAnalysis()
@@ -97,7 +97,7 @@ async function generateAnalysis() {
 
   loading.value = true
   try {
-    const res = await investorApi.deepAnalyzeTeaser(teaser.value.id)
+    const res = await investorApi.createAnalysis({ teaserId: teaser.value.id, deepAnalysis: true })
     analysis.value = res.data
     ElMessage.success('深度分析报告生成成功')
   } catch (error) {

@@ -1,5 +1,5 @@
 // 用户类型
-export type UserType = 'investor' | 'entrepreneur' | 'admin'
+export type UserType = 'INVESTOR' | 'ENTREPRENEUR' | 'ADMIN'
 
 export type UserStatus = 'active' | 'pending' | 'inactive' | 'banned'
 
@@ -7,114 +7,91 @@ export interface User {
   id: number
   phone: string
   email?: string
+  nickname?: string
   userType: UserType
   realName?: string
   avatarUrl?: string
   status: UserStatus
   isVerified: boolean
-  createdAt: string
+  bio?: string
   lastLoginAt?: string
-  notificationCount: number
-  unreadQuestionCount: number
-  profileCompletionRate: number
+  createdAt: string
 }
 
 // 投资人资料
 export interface InvestorProfile {
   id: number
-  userId: number
   avatarUrl?: string
   institutionName?: string
   position?: string
-  department?: string
-  workYears?: number
-  institutionType?: 'vc' | 'pe' | 'angel' | 'corporate' | 'family_office' | 'other'
-  investmentStage?: string[]
-  investmentIndustries?: string[]
-  investmentRegion?: string[]
-  investmentRangeMin?: number
-  investmentRangeMax?: number
-  phone?: string
-  wechat?: string
-  introduction?: string
+  interestedIndustries?: string[]
+  interestedStages?: string[]
+  minInvestmentAmount?: number
+  maxInvestmentAmount?: number
+  interestedRegions?: string[]
   investmentPhilosophy?: string
-  notableInvestments?: string
-  websiteUrl?: string
-  linkedinUrl?: string
-  investmentScore: number
-  activityLevel: 'low' | 'medium' | 'high'
-  responseRate?: number
-  avgResponseTime?: number
-  investmentCount: number
-  followersCount: number
-  isVerified: boolean
-  verificationLevel: 'basic' | 'vip' | 'premium'
+  investmentCases?: string
+  verificationStatus?: 'pending' | 'approved' | 'rejected'
+  completeness?: number
+  updatedAt?: string
 }
 
 // 融资用户资料
 export interface EntrepreneurProfile {
   id: number
-  userId: number
-  companyName: string
   companyLogoUrl?: string
+  companyName: string
   industry?: string
-  businessLicenseNumber?: string
-  legalRepresentative?: string
-  registeredCapital?: number
+  financingStage?: string
   location?: string
-  officeAddress?: string
-  companyStage?: 'idea' | 'seed' | 'angel' | 'a' | 'b' | 'c' | 'd'
-  foundedDate?: string
-  teamSize?: number
-  contactPerson?: string
+  companySize?: string
+  companyIntroduction?: string
+  coreBusiness?: string
+  targetFinancingAmount?: number
+  website?: string
   contactPhone?: string
   contactEmail?: string
-  businessHours?: string
-  websiteUrl?: string
-  socialMediaUrls?: Record<string, string>
-  introduction?: string
-  productDescription?: string
-  targetCustomers?: string
-  coreAdvantages?: string
-  developmentPlans?: string
+  verificationStatus?: 'pending' | 'approved' | 'rejected'
+  completeness?: number
+  updatedAt?: string
 }
 
 // 项目
 export interface Project {
   id: number
-  entrepreneurUserId: number
-  projectName: string
-  projectCode?: string
+  name: string
+  summary?: string
   industry?: string
+  financingStage?: string
+  financingAmount?: number
+  financingPurpose?: string
   location?: string
+  businessDescription?: string
+  businessModel?: string
+  targetMarket?: string
+  competitiveAdvantage?: string
+  status: 'draft' | 'published' | 'hidden' | 'archived'
+  hasBp?: boolean
+  hasTeaser?: boolean
+  // 以下字段前端表单使用，后端可能不返回
+  projectName?: string
+  oneLineDescription?: string
   companyFoundedDate?: string
   officeAddress?: string
   companyWebsite?: string
-  financingStage?: 'seed' | 'angel' | 'a' | 'b' | 'c' | 'd'
-  financingAmount?: number
-  valuation?: number
+  teamSize?: number
   equityPercentage?: number
   financingHistory?: string
-  oneLineDescription?: string
-  businessDescription?: string
-  logoUrl?: string
-  iconEmoji?: string
-  tags?: string[]
-  businessPlanFileUrl?: string
   marketSize?: string
-  competitiveAdvantage?: string
-  contactPerson?: string
-  contactPhone?: string
-  contactEmail?: string
-  businessModel?: string
   revenueYtd?: number
   revenueLastYear?: number
   grossMargin?: number
-  teamSize?: number
-  status: 'draft' | 'published' | 'hidden' | 'archived'
-  isAnonymous: boolean
-  viewCount: number
-  favoriteCount: number
+  contactPerson?: string
+  contactPhone?: string
+  contactEmail?: string
+  isAnonymous?: boolean
+  iconEmoji?: string
+  tags?: string[]
   createdAt: string
   updatedAt: string
 }
@@ -123,39 +100,36 @@ export interface Project {
 export interface Teaser {
   id: number
   projectId: number
-  businessPlanId?: number
+  projectName?: string
   title: string
-  coverImageUrl?: string
-  subtitle?: string
-  companyName?: string
-  isAnonymousCompany: boolean
+  summary?: string
   iconEmoji?: string
-  aiSummary?: string
-  keyMetrics?: Record<string, any>
-  companyOverview?: string
-  coreBusiness?: string
-  teamDescription?: string
-  productDescription?: string
-  customerCases?: string
-  investmentHighlights?: string
-  riskFactors?: string
-  contactPermissionRequired: boolean
-  marketSize?: string
+  industry?: string
+  financingStage?: string
+  financingAmount?: number
+  financingPurpose?: string
+  location?: string
+  highlights?: string[]
+  businessModel?: string
+  targetMarket?: string
   competitiveAdvantage?: string
-  financialData?: Record<string, any>
-  financingPlan?: string
-  tags?: string[]
+  teamIntroduction?: string
+  status: 'draft' | 'published' | 'hidden'
   viewCount: number
   favoriteCount: number
-  matchScoreAvg: number
-  status: 'draft' | 'published' | 'hidden'
-  aiAnalysisReady: boolean
-  lastAnalyzedAt?: string
-  sharingUrl?: string
-  expireDate?: string
-  generatedAt?: string
+  matchScore?: number
+  isFavorite?: boolean
+  tags?: string[]
   createdAt: string
-  updatedAt: string
+  publishedAt?: string
+  // 前端兼容旧字段
+  subtitle?: string
+  companyOverview?: string
+  coreBusiness?: string
+  investmentHighlights?: string
+  marketSize?: string
+  financialData?: Record<string, any>
+  financingPlan?: string
 }
 
 // 商业计划书
@@ -164,18 +138,9 @@ export interface BusinessPlan {
   projectId: number
   fileName: string
   fileUrl: string
-  thumbnailUrl?: string
   fileSize?: number
-  pageCount?: number
-  fileFormat?: 'pdf' | 'ppt' | 'pptx'
-  fileHash?: string
-  uploadStatus: 'uploading' | 'completed' | 'failed'
-  uploadSource: 'web' | 'api' | 'mobile'
-  teaserGenerationStatus: 'pending' | 'processing' | 'completed' | 'failed'
-  extractionStatus: 'pending' | 'processing' | 'completed' | 'failed'
-  extractedContent?: Record<string, any>
-  aiAnalysisStatus: 'pending' | 'processing' | 'completed' | 'failed'
-  analysisId?: number
+  fileFormat?: string
+  teaserGenerationStatus?: 'pending' | 'processing' | 'completed' | 'failed'
   teaserId?: number
   createdAt: string
   updatedAt: string
@@ -184,50 +149,47 @@ export interface BusinessPlan {
 // 问答记录
 export interface QARecord {
   id: number
-  projectId: number
-  investorUserId: number
-  entrepreneurUserId: number
-  investorName?: string
-  questionTitle?: string
+  teaserId: number
+  teaserTitle?: string
+  projectName?: string
+  questionerId?: number
+  questionerName?: string
   question: string
-  investorMessage?: string
+  category?: string
   answer?: string
-  draftAnswer?: string
-  isPublic: boolean
-  isFromQuestionLibrary: boolean
-  questionLibraryId?: number
-  allowPublic: boolean
-  usePrivacySetting: boolean
-  questionStatus: 'pending' | 'answered' | 'ignored'
+  answererId?: number
+  answererName?: string
   status: 'pending' | 'answered' | 'ignored'
-  sentAt: string
+  isPublic: boolean
+  questionedAt?: string
   answeredAt?: string
-  investorViewedAt?: string
-  entrepreneurViewedAt?: string
+  createdAt: string
+  // 前端兼容旧字段
+  projectId?: number
+  investorName?: string
+  investorMessage?: string
+  questionTitle?: string
+  questionStatus?: 'pending' | 'answered' | 'ignored'
+  sentAt?: string
 }
 
 // 申请
 export interface Application {
   id: number
+  teaserId: number
+  teaserTitle?: string
+  projectName?: string
+  applicantId?: number
+  applicantName?: string
   applicationType: 'get_bp' | 'contact_company' | 'view_contact'
-  investorUserId: number
-  projectId: number
-  entrepreneurUserId: number
-  investorName?: string
-  investorInstitution?: string
-  investorPosition?: string
-  contactInfo?: string
-  applicationStatus: 'pending' | 'approved' | 'rejected' | 'cancelled'
-  applicationReason?: string
-  rejectionReason?: string
-  adminNotes?: string
-  reviewedBy?: number
+  reason?: string
+  institutionName?: string
+  position?: string
+  status: 'pending' | 'approved' | 'rejected' | 'cancelled'
+  reviewComment?: string
+  reviewerId?: number
   reviewedAt?: string
-  expiresAt?: string
-  viewedCount: number
-  lastViewedAt?: string
   createdAt: string
-  updatedAt: string
 }
 
 // 问题库问题
@@ -249,9 +211,9 @@ export interface QuestionLibraryItem {
 export interface InvestmentAnalysis {
   id: number
   teaserId: number
-  investorUserId: number
+  analysisType?: string
   overallScore?: number
-  overallVerdict?: 'highly_recommend' | 'recommend' | 'consider' | 'pass'
+  overallVerdict?: string
   industryAnalysisScore?: number
   industryAnalysisText?: string
   teamAnalysisScore?: number
@@ -267,25 +229,16 @@ export interface InvestmentAnalysis {
   investmentHighlights?: string
   riskWarnings?: string
   investmentSuggestion?: string
-  marketSize?: string
-  marketGrowthRate?: string
-  revenueData?: Record<string, any>
-  profitMargin?: string
-  customerCount?: number
-  customerRetentionRate?: string
-  dataSource?: string
-  exportFileUrl?: string
-  isAiGenerated: boolean
-  analysisType: 'basic' | 'deep'
   createdAt: string
   updatedAt: string
+  // 前端兼容旧字段
+  dataSource?: string
 }
 
 // 通知
 export interface Notification {
   id: number
-  userId: number
-  notificationType: 'question_received' | 'question_answered' | 'bp_request_approved' | 'bp_request_rejected' | 'contact_request_approved' | 'contact_request_rejected' | 'verification_approved' | 'verification_rejected' | 'new_project' | 'new_teaser' | 'system_announcement' | 'ai_analysis_ready'
+  type: string
   title: string
   content?: string
   relatedId?: number
@@ -297,7 +250,6 @@ export interface Notification {
 // 隐私设置
 export interface PrivacySettings {
   id: number
-  userId: number
   allowShowCompanyName: boolean
   allowShowFoundedTime: boolean
   allowShowCompanyScale: boolean
@@ -323,15 +275,32 @@ export interface PrivacySettings {
 export interface LoginRequest {
   phone: string
   password: string
-  userType: UserType
+  loginType?: 'PASSWORD' | 'SMS_CODE'
+}
+
+// 登录响应
+export interface LoginResponse {
+  token: string
+  refreshToken: string
+  user: User
 }
 
 // 注册请求
 export interface RegisterRequest {
   phone: string
-  verificationCode: string
+  code: string
   password: string
   userType: UserType
+  agreedToTerms?: boolean
+}
+
+// 注册响应
+export interface RegisterResponse {
+  userId: number
+  token: string
+  refreshToken: string
+  userType: UserType
+  expiresAt: number
 }
 
 // 发送验证码请求
@@ -345,13 +314,75 @@ export interface ApiResponse<T = any> {
   code: number
   message: string
   data: T
+  timestamp?: string
 }
 
-// 分页响应
+// 分页响应（Spring Data标准格式）
 export interface PaginatedResponse<T> {
-  items: T[]
-  total: number
-  page: number
-  pageSize: number
+  content: T[]
+  totalElements: number
   totalPages: number
+  number: number
+  size: number
+  first: boolean
+  last: boolean
+  numberOfElements: number
+}
+
+// Dashboard统计
+export interface DashboardStats {
+  viewedCount?: number
+  favoriteCount: number
+  analyzedCount: number
+  pendingCount: number
+}
+
+// 推荐Teaser
+export interface RecommendedTeaser {
+  id: number
+  title: string
+  summary: string
+  iconEmoji?: string
+  industry: string
+  financingStage: string
+  matchScore: number
+  viewCount: number
+  favoriteCount: number
+  isFavorite: boolean
+  tags?: string[]
+  createdAt: string
+}
+
+// 最近活动
+export interface RecentActivity {
+  type: string
+  teaserId: number
+  teaserTitle: string
+  description: string
+  timestamp: string
+}
+
+// 收藏
+export interface Favorite {
+  id: number
+  teaserId: number
+  teaserTitle: string
+  teaserSummary?: string
+  iconEmoji?: string
+  industry?: string
+  financingStage?: string
+  financingAmount?: number
+  groupName?: string
+  note?: string
+  tags?: string[]
+  createdAt: string
+}
+
+// 文件上传响应
+export interface FileUploadResponse {
+  fileName: string
+  filePath: string
+  fileUrl: string
+  fileSize: number
+  fileType: string
 }

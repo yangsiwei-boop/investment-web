@@ -276,7 +276,7 @@ async function loadData() {
 
     // 尝试加载已有的分析
     try {
-      const analysisRes = await investorApi.getAnalysisResult(teaserId)
+      const analysisRes = await investorApi.getTeaserAnalysis(teaserId)
       analysis.value = analysisRes.data
     } catch {
       // 没有分析数据，自动生成
@@ -295,7 +295,7 @@ async function generateAnalysis() {
 
   loading.value = true
   try {
-    const res = await investorApi.analyzeTeaser(teaser.value.id)
+    const res = await investorApi.createAnalysis({ teaserId: teaser.value.id })
     analysis.value = res.data
     ElMessage.success('分析报告生成成功')
   } catch (error) {

@@ -11,32 +11,124 @@ import type {
   ApiResponse
 } from '@/types'
 
+// ========== 用户资料 ==========
+
 // 获取融资用户资料
 export function getEntrepreneurProfile(): Promise<ApiResponse<EntrepreneurProfile>> {
-  return request.get('/entrepreneur/profile')
+  return request.get('/profile/entrepreneur')
 }
 
 // 更新融资用户资料
 export function updateEntrepreneurProfile(data: Partial<EntrepreneurProfile>): Promise<ApiResponse<EntrepreneurProfile>> {
-  return request.put('/entrepreneur/profile', data)
+  return request.put('/profile/entrepreneur', data)
 }
 
-// 获取工作台统计数据
-export function getEntrepreneurStats(): Promise<ApiResponse<{
-  uploadedBPCount: number
-  generatedTeaserCount: number
-  investorViewCount: number
-  pendingInfoCount: number
-}>> {
-  return request.get('/entrepreneur/stats')
+// ========== 融资方Dashboard ==========
+
+// 获取Dashboard
+export function getEntrepreneurDashboard(): Promise<ApiResponse<any>> {
+  return request.get('/entrepreneur/dashboard')
 }
 
-// 上传商业计划书
-export function uploadBusinessPlan(file: File, onProgress?: (progress: number) => void): Promise<ApiResponse<BusinessPlan>> {
+// ========== 融资方项目管理 ==========
+
+// 获取项目列表
+export function getProjects(params: {
+  page?: number
+  size?: number
+}): Promise<ApiResponse<PaginatedResponse<Project>>> {
+  return request.get('/entrepreneur/projects', { params })
+}
+
+// 创建项目
+export function createProject(data: Partial<Project>): Promise<ApiResponse<Project>> {
+  return request.post('/entrepreneur/projects', data)
+}
+
+// 获取项目详情
+export function getProjectDetail(projectId: number): Promise<ApiResponse<Project>> {
+  return request.get(`/entrepreneur/projects/${projectId}`)
+}
+
+// 更新项目
+export function updateProject(projectId: number, data: Partial<Project>): Promise<ApiResponse<Project>> {
+  return request.put(`/entrepreneur/projects/${projectId}`, data)
+}
+
+// 删除项目
+export function deleteProject(projectId: number): Promise<ApiResponse> {
+  return request.delete(`/entrepreneur/projects/${projectId}`)
+}
+
+// ========== 融资方Teaser管理 ==========
+
+// 获取Teaser列表
+export function getTeaserList(params: {
+  page?: number
+  size?: number
+}): Promise<ApiResponse<PaginatedResponse<Teaser>>> {
+  return request.get('/entrepreneur/teasers', { params })
+}
+
+// 创建Teaser
+export function createTeaser(data: {
+  projectId: number
+  title: string
+  summary: string
+  iconEmoji?: string
+  highlights?: string[]
+  businessModel?: string
+  targetMarket?: string
+  competitiveAdvantage?: string
+  teamIntroduction?: string
+  autoGenerate?: boolean
+}): Promise<ApiResponse<Teaser>> {
+  return request.post('/entrepreneur/teasers', data)
+}
+
+// 获取Teaser详情
+export function getTeaserDetail(teaserId: number): Promise<ApiResponse<Teaser>> {
+  return request.get(`/entrepreneur/teasers/${teaserId}`)
+}
+
+// 更新Teaser
+export function updateTeaser(teaserId: number, data: Partial<Teaser>): Promise<ApiResponse<Teaser>> {
+  return request.put(`/entrepreneur/teasers/${teaserId}`, data)
+}
+
+// 发布Teaser
+export function publishTeaser(teaserId: number): Promise<ApiResponse> {
+  return request.post(`/entrepreneur/teasers/${teaserId}/publish`)
+}
+
+// 下架Teaser
+export function unpublishTeaser(teaserId: number): Promise<ApiResponse> {
+  return request.post(`/entrepreneur/teasers/${teaserId}/unpublish`)
+}
+
+// 自动生成Teaser
+export function autoGenerateTeaser(projectId: number): Promise<ApiResponse<Teaser>> {
+  return request.post(`/entrepreneur/teasers/auto-generate/${projectId}`)
+}
+
+// 删除Teaser
+export function deleteTeaser(teaserId: number): Promise<ApiResponse> {
+  return request.delete(`/entrepreneur/teasers/${teaserId}`)
+}
+
+// ========== 融资方商业计划书 ==========
+
+// 获取项目的BP列表
+export function getBusinessPlans(projectId: number): Promise<ApiResponse<BusinessPlan[]>> {
+  return request.get(`/entrepreneur/bp/project/${projectId}`)
+}
+
+// 上传BP
+export function uploadBusinessPlan(projectId: number, file: File, onProgress?: (progress: number) => void): Promise<ApiResponse<BusinessPlan>> {
   const formData = new FormData()
   formData.append('file', file)
 
-  return request.post('/entrepreneur/business-plans', formData, {
+  return request.post(`/entrepreneur/bp/upload/${projectId}`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
     onUploadProgress: (progressEvent: { loaded: number; total?: number }) => {
       if (onProgress && progressEvent.total) {
@@ -47,121 +139,71 @@ export function uploadBusinessPlan(file: File, onProgress?: (progress: number) =
   })
 }
 
-// 获取商业计划书列表
-export function getBusinessPlans(): Promise<ApiResponse<BusinessPlan[]>> {
-  return request.get('/entrepreneur/business-plans')
+// 获取BP详情
+export function getBusinessPlanDetail(bpId: number): Promise<ApiResponse<BusinessPlan>> {
+  return request.get(`/entrepreneur/bp/${bpId}`)
 }
 
-// 获取商业计划书详情
-export function getBusinessPlanDetail(id: number): Promise<ApiResponse<BusinessPlan>> {
-  return request.get(`/entrepreneur/business-plans/${id}`)
+// 删除BP
+export function deleteBusinessPlan(bpId: number): Promise<ApiResponse> {
+  return request.delete(`/entrepreneur/bp/${bpId}`)
 }
 
-// 删除商业计划书
-export function deleteBusinessPlan(id: number): Promise<ApiResponse> {
-  return request.delete(`/entrepreneur/business-plans/${id}`)
-}
+// ========== 融资方问答 ==========
 
-// 获取项目列表
-export function getProjects(): Promise<ApiResponse<Project[]>> {
-  return request.get('/entrepreneur/projects')
-}
-
-// 创建项目
-export function createProject(data: Partial<Project>): Promise<ApiResponse<Project>> {
-  return request.post('/entrepreneur/projects', data)
-}
-
-// 更新项目
-export function updateProject(id: number, data: Partial<Project>): Promise<ApiResponse<Project>> {
-  return request.put(`/entrepreneur/projects/${id}`, data)
-}
-
-// 获取项目详情
-export function getProjectDetail(id: number): Promise<ApiResponse<Project>> {
-  return request.get(`/entrepreneur/projects/${id}`)
-}
-
-// 发布项目
-export function publishProject(id: number): Promise<ApiResponse> {
-  return request.post(`/entrepreneur/projects/${id}/publish`)
-}
-
-// 隐藏项目
-export function hideProject(id: number): Promise<ApiResponse> {
-  return request.post(`/entrepreneur/projects/${id}/hide`)
-}
-
-// 获取Teaser
-export function getTeaser(projectId: number): Promise<ApiResponse<Teaser>> {
-  return request.get(`/entrepreneur/projects/${projectId}/teaser`)
-}
-
-// 预览Teaser
-export function previewTeaser(id: number): Promise<ApiResponse<Teaser>> {
-  return request.get(`/entrepreneur/teasers/${id}`)
-}
-
-// 更新Teaser
-export function updateTeaser(id: number, data: Partial<Teaser>): Promise<ApiResponse<Teaser>> {
-  return request.put(`/entrepreneur/teasers/${id}`, data)
-}
-
-// 获取收到的提问
+// 获取收到的问题列表
 export function getReceivedQuestions(params: {
-  status?: 'pending' | 'answered' | 'ignored'
+  status?: string
   page?: number
-  pageSize?: number
+  size?: number
 }): Promise<ApiResponse<PaginatedResponse<QARecord>>> {
-  return request.get('/entrepreneur/questions', { params })
+  return request.get('/entrepreneur/qa', { params })
 }
 
-// 回复问题
-export function answerQuestion(questionId: number, data: {
+// 获取问题详情
+export function getQuestionDetail(qaId: number): Promise<ApiResponse<QARecord>> {
+  return request.get(`/entrepreneur/qa/${qaId}`)
+}
+
+// 回答问题
+export function answerQuestion(qaId: number, data: {
   answer: string
-  isPublic: boolean
+  isPublic?: boolean
 }): Promise<ApiResponse<QARecord>> {
-  return request.post(`/entrepreneur/questions/${questionId}/answer`, data)
+  return request.post(`/entrepreneur/qa/${qaId}/answer`, data)
 }
 
-// 忽略问题
-export function ignoreQuestion(questionId: number): Promise<ApiResponse> {
-  return request.post(`/entrepreneur/questions/${questionId}/ignore`)
-}
+// ========== 隐私设置 ==========
 
 // 获取隐私设置
 export function getPrivacySettings(): Promise<ApiResponse<PrivacySettings>> {
-  return request.get('/entrepreneur/privacy-settings')
+  return request.get('/profile/privacy')
 }
 
 // 更新隐私设置
 export function updatePrivacySettings(data: Partial<PrivacySettings>): Promise<ApiResponse<PrivacySettings>> {
-  return request.put('/entrepreneur/privacy-settings', data)
+  return request.put('/profile/privacy', data)
 }
 
-// 获取收到的申请
+// ========== 融资方申请管理 ==========
+
+// 获取收到的申请列表
 export function getReceivedApplications(params: {
-  type?: 'get_bp' | 'contact_company' | 'view_contact'
-  status?: 'pending' | 'approved' | 'rejected'
+  status?: string
   page?: number
-  pageSize?: number
+  size?: number
 }): Promise<ApiResponse<PaginatedResponse<Application>>> {
   return request.get('/entrepreneur/applications', { params })
 }
 
-// 审核申请
-export function reviewApplication(applicationId: number, data: {
-  status: 'approved' | 'rejected'
-  rejectionReason?: string
-}): Promise<ApiResponse<Application>> {
-  return request.post(`/entrepreneur/applications/${applicationId}/review`, data)
+// 获取申请详情
+export function getApplicationDetail(applicationId: number): Promise<ApiResponse<Application>> {
+  return request.get(`/entrepreneur/applications/${applicationId}`)
 }
 
-// 获取项目分析数据
-export function getProjectAnalytics(projectId: number): Promise<ApiResponse<{
-  viewCount: number
-  viewTrend: { date: string; count: number }[]
-  topInvestors: { id: number; name: string; viewCount: number }[]
-}>> {
-  return request.get(`/entrepreneur/projects/${projectId}/analytics`)
+// 审核申请（参数通过URL查询参数传递）
+export function reviewApplication(applicationId: number, approved: boolean, comment?: string): Promise<ApiResponse<Application>> {
+  return request.post(`/entrepreneur/applications/${applicationId}/review`, null, {
+    params: { approved, comment }
+  })
 }

@@ -1,23 +1,27 @@
 import axios from 'axios'
-import type { AxiosInstance, AxiosResponse } from 'axios'
+import type { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 import { ElMessage } from 'element-plus'
-import { useAuthStore } from '@/stores/auth'
 import router from '@/router'
 
 const service: AxiosInstance = axios.create({
-  baseURL: '/api',
-  timeout: 30000,
+  baseURL: '/api/v1',
+  timeout: 15000,
   headers: {
     'Content-Type': 'application/json'
   }
 })
 
+// 是否正在刷新token
+let isRefreshing = false
+// 重试请求队列
+let retryQueue: Array<{ resolve: (value: any) => void; reject: (reason?: any) => void; config: InternalAxiosRequestConfig }> = []
+
 // 请求拦截器
 service.interceptors.request.use(
   (config) => {
-    const authStore = useAuthStore()
-    if (authStore.token) {
-      config.headers.Authorization = `Bearer ${authStore.token}`
+    const token = localStorage.getItem('token')
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
     }
     return config
   },
@@ -26,6 +30,31 @@ service.interceptors.request.use(
     return Promise.reject(error)
   }
 )
+
+// 刷新Token
+async function refreshToken(): Promise<string | null> {
+  const rt = localStorage.getItem('refreshToken')
+  if (!rt) {
+    return null
+  }
+  try {
+    const { data } = await axios.post('/api/v1/auth/refresh', { refreshToken: rt })
+    if (data.code === 200 && data.data) {
+      localStorage.setItem('token', data.data.token)
+      return data.data.token
+    }
+    return null
+  } catch {
+    return null
+  }
+}
+
+// 清除登录状态并跳转
+function clearAuthAndRedirect() {
+  localStorage.removeItem('token')
+  localStorage.removeItem('refreshToken')
+  router.push({ name: 'Login' })
+}
 
 // 响应拦截器
 service.interceptors.response.use(
@@ -38,16 +67,48 @@ service.interceptors.response.use(
     }
 
     // 业务状态码判断
-    if (res.code !== 200 && res.code !== 0) {
-      ElMessage.error(res.message || '请求失败')
+    if (res.code !== 200) {
+      // 20002: Token已过期，尝试刷新
+      if (res.code === 20002) {
+        const config = response.config as InternalAxiosRequestConfig
 
-      // 401: 未授权
-      if (res.code === 401) {
-        const authStore = useAuthStore()
-        authStore.logout()
-        router.push({ name: 'Login' })
+        if (!isRefreshing) {
+          isRefreshing = true
+          refreshToken().then((newToken) => {
+            isRefreshing = false
+            if (newToken) {
+              // 重试队列中的请求
+              retryQueue.forEach(({ resolve, config: retryConfig }) => {
+                retryConfig.headers.Authorization = `Bearer ${newToken}`
+                resolve(service(retryConfig))
+              })
+              retryQueue = []
+            } else {
+              retryQueue.forEach(({ reject }) => reject(new Error('Token refresh failed')))
+              retryQueue = []
+              clearAuthAndRedirect()
+            }
+          }).catch(() => {
+            isRefreshing = false
+            retryQueue.forEach(({ reject }) => reject(new Error('Token refresh failed')))
+            retryQueue = []
+            clearAuthAndRedirect()
+          })
+        }
+
+        return new Promise((resolve, reject) => {
+          retryQueue.push({ resolve, reject, config })
+        })
       }
 
+      // 20003/20005: Token无效/Refresh Token无效
+      if (res.code === 20003 || res.code === 20005) {
+        clearAuthAndRedirect()
+        return Promise.reject(new Error(res.message || '认证失败'))
+      }
+
+      // 其他业务错误
+      ElMessage.error(res.message || '请求失败')
       return Promise.reject(new Error(res.message || '请求失败'))
     }
 
@@ -60,9 +121,7 @@ service.interceptors.response.use(
       switch (error.response.status) {
         case 401:
           ElMessage.error('登录已过期，请重新登录')
-          const authStore = useAuthStore()
-          authStore.logout()
-          router.push({ name: 'Login' })
+          clearAuthAndRedirect()
           break
         case 403:
           ElMessage.error('没有权限访问')

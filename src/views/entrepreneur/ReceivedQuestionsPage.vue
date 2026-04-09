@@ -18,14 +18,14 @@
       <div v-for="question in questions" :key="question.id" class="question-item">
         <div class="question-header">
           <div class="investor-info">
-            <el-avatar :size="40">{{ question.investorName?.charAt(0) || '投' }}</el-avatar>
+            <el-avatar :size="40">{{ (question.questionerName || question.investorName)?.charAt(0) || '投' }}</el-avatar>
             <div class="investor-details">
-              <div class="investor-name">{{ question.investorName || '投资人' }}</div>
-              <div class="question-time">{{ formatDate(question.sentAt) }}</div>
+              <div class="investor-name">{{ question.questionerName || question.investorName || '投资人' }}</div>
+              <div class="question-time">{{ formatDate(question.questionedAt || question.sentAt || '') }}</div>
             </div>
           </div>
-          <el-tag :type="getStatusType(question.questionStatus)" size="small">
-            {{ getStatusLabel(question.questionStatus) }}
+          <el-tag :type="getStatusType(question.status || question.questionStatus)" size="small">
+            {{ getStatusLabel(question.status || question.questionStatus) }}
           </el-tag>
         </div>
 
@@ -49,24 +49,17 @@
 
         <div class="question-actions">
           <el-button
-            v-if="question.questionStatus === 'pending'"
+            v-if="(question.status || question.questionStatus) === 'pending'"
             type="primary"
             @click="replyQuestion(question)"
           >
             回复
           </el-button>
           <el-button
-            v-if="question.questionStatus === 'answered'"
+            v-if="(question.status || question.questionStatus) === 'answered'"
             @click="editReply(question)"
           >
             编辑回复
-          </el-button>
-          <el-button
-            v-if="question.questionStatus === 'pending'"
-            type="info"
-            @click="ignoreQuestion(question)"
-          >
-            忽略
           </el-button>
         </div>
       </div>
@@ -137,7 +130,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import EmptyState from '@/components/common/EmptyState.vue'
 import * as entrepreneurApi from '@/api/entrepreneur'
 import type { QARecord } from '@/types'
@@ -160,10 +153,11 @@ const replyForm = ref({
 })
 
 function formatDate(date: string): string {
+  if (!date) return ''
   return dayjs(date).format('YYYY-MM-DD HH:mm')
 }
 
-function getStatusType(status: string) {
+function getStatusType(status: string | undefined): 'primary' | 'success' | 'warning' | 'info' | 'danger' {
   switch (status) {
     case 'pending':
       return 'warning'
@@ -172,11 +166,11 @@ function getStatusType(status: string) {
     case 'ignored':
       return 'info'
     default:
-      return ''
+      return 'info'
   }
 }
 
-function getStatusLabel(status: string): string {
+function getStatusLabel(status: string | undefined): string {
   switch (status) {
     case 'pending':
       return '待回复'
@@ -185,7 +179,7 @@ function getStatusLabel(status: string): string {
     case 'ignored':
       return '已忽略'
     default:
-      return status
+      return status || ''
   }
 }
 
@@ -205,19 +199,6 @@ function editReply(question: QARecord) {
     isPublic: question.isPublic
   }
   replyDialogVisible.value = true
-}
-
-async function ignoreQuestion(question: QARecord) {
-  try {
-    await ElMessageBox.confirm('确定要忽略这个问题吗？', '提示', {
-      type: 'warning'
-    })
-    await entrepreneurApi.ignoreQuestion(question.id)
-    ElMessage.success('已忽略')
-    loadQuestions()
-  } catch {
-    // 用户取消
-  }
 }
 
 async function submitReply() {
@@ -245,10 +226,10 @@ async function loadQuestions() {
     const res = await entrepreneurApi.getReceivedQuestions({
       status: statusFilter.value as any,
       page: currentPage.value,
-      pageSize
+      size: pageSize
     })
-    questions.value = res.data.items
-    total.value = res.data.total
+    questions.value = res.data.content
+    total.value = res.data.totalElements
   } catch (error) {
     console.error('Failed to load questions:', error)
   } finally {

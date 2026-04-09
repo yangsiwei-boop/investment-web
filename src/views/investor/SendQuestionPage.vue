@@ -246,11 +246,10 @@ async function handleSend() {
   sending.value = true
   try {
     await investorApi.sendQuestion({
-      projectId,
-      entrepreneurUserId: project.value?.entrepreneurUserId || 0,
+      teaserId: projectId,
       question: currentQuestion.value.questionTitle,
-      investorMessage: investorMessage.value,
-      questionLibraryId: selectedQuestion.value?.id
+      isPublic: false,
+      category: currentQuestion.value.category || undefined
     })
 
     ElMessage.success('问题已发送')

@@ -212,7 +212,7 @@ async function uploadAndProcess() {
       }
     }, 500)
 
-    const res = await entrepreneurApi.uploadBusinessPlan(uploadedFile.value, (progress) => {
+    const res = await entrepreneurApi.uploadBusinessPlan(selectedProjectId.value, uploadedFile.value, (progress) => {
       processProgress.value = Math.min(progress, 90)
     })
 
@@ -244,8 +244,8 @@ function viewProject() {
 // 加载项目列表
 async function loadProjects() {
   try {
-    const res = await entrepreneurApi.getProjects()
-    projects.value = res.data
+    const res = await entrepreneurApi.getProjects({ page: 0, size: 100 })
+    projects.value = res.data.content
   } catch (error) {
     console.error('Failed to load projects:', error)
   }

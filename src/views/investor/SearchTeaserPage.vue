@@ -61,7 +61,7 @@
           v-for="teaser in teasers"
           :key="teaser.id"
           :teaser="teaser"
-          :match-score="teaser.matchScoreAvg"
+          :match-score="teaser.matchScore"
           @favorite="handleFavorite"
           @unfavorite="handleUnfavorite"
         />
@@ -145,13 +145,13 @@ async function loadTeasers() {
   try {
     const res = await investorApi.searchTeasers({
       keyword: keyword.value,
-      industry: filters.industry,
-      stage: filters.stage,
+      industries: filters.industry ? [filters.industry] : undefined,
+      financingStages: filters.stage ? [filters.stage] : undefined,
       page: currentPage.value,
       pageSize
     })
-    teasers.value = res.data.items
-    total.value = res.data.total
+    teasers.value = res.data.content
+    total.value = res.data.totalElements
   } catch (error) {
     console.error('Failed to load teasers:', error)
   } finally {
@@ -167,7 +167,7 @@ function handlePageChange(page: number) {
 
 async function handleFavorite(teaserId: number) {
   try {
-    await investorApi.favoriteTeaser(teaserId)
+    await investorApi.addFavorite({ teaserId })
     ElMessage.success('已收藏')
   } catch (error) {
     ElMessage.error('收藏失败')
@@ -176,7 +176,7 @@ async function handleFavorite(teaserId: number) {
 
 async function handleUnfavorite(teaserId: number) {
   try {
-    await investorApi.unfavoriteTeaser(teaserId)
+    await investorApi.removeFavorite(teaserId)
     ElMessage.success('已取消收藏')
   } catch (error) {
     ElMessage.error('操作失败')

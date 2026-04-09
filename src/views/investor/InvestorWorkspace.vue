@@ -7,7 +7,7 @@
       <div class="stats-grid">
         <div class="stat-card">
           <div class="label">已浏览Teaser</div>
-          <div class="value">{{ stats.viewedTeasers }}</div>
+          <div class="value">{{ stats.viewedCount }}</div>
         </div>
         <div class="stat-card">
           <div class="label">收藏项目</div>
@@ -66,7 +66,7 @@
           v-for="teaser in recommendedTeasers"
           :key="teaser.id"
           :teaser="teaser"
-          :match-score="teaser.matchScoreAvg"
+          :match-score="teaser.matchScore"
           @favorite="handleFavorite"
           @unfavorite="handleUnfavorite"
         />
@@ -89,15 +89,15 @@ import { useAuthStore } from '@/stores/auth'
 import TeaserCard from '@/components/common/TeaserCard.vue'
 import EmptyState from '@/components/common/EmptyState.vue'
 import * as investorApi from '@/api/investor'
-import type { Teaser } from '@/types'
+import type { DashboardStats } from '@/types'
 
 const router = useRouter()
 const authStore = useAuthStore()
 
 const userName = computed(() => authStore.user?.realName || '投资人')
 
-const stats = ref({
-  viewedTeasers: 0,
+const stats = ref<DashboardStats>({
+  viewedCount: 0,
   favoriteCount: 0,
   analyzedCount: 0,
   pendingCount: 0
@@ -105,7 +105,7 @@ const stats = ref({
 
 const searchKeyword = ref('')
 const selectedTags = ref<string[]>(['all'])
-const recommendedTeasers = ref<Teaser[]>([])
+const recommendedTeasers = ref<any[]>([])
 
 const filterTags = [
   { label: '全部', value: 'all' },
@@ -152,7 +152,7 @@ function handleSearch() {
 
 async function handleFavorite(teaserId: number) {
   try {
-    await investorApi.favoriteTeaser(teaserId)
+    await investorApi.addFavorite({ teaserId })
     ElMessage.success('已收藏')
   } catch (error) {
     ElMessage.error('收藏失败')
@@ -161,7 +161,7 @@ async function handleFavorite(teaserId: number) {
 
 async function handleUnfavorite(teaserId: number) {
   try {
-    await investorApi.unfavoriteTeaser(teaserId)
+    await investorApi.removeFavorite(teaserId)
     ElMessage.success('已取消收藏')
   } catch (error) {
     ElMessage.error('操作失败')
@@ -175,8 +175,8 @@ async function loadData() {
     stats.value = statsRes.data
 
     // 加载推荐项目
-    const teasersRes = await investorApi.getRecommendedTeasers(6)
-    recommendedTeasers.value = teasersRes.data
+    const teasersRes = await investorApi.getRecommendedProjects(6)
+    recommendedTeasers.value = teasersRes.data || []
   } catch (error) {
     console.error('Failed to load data:', error)
   }

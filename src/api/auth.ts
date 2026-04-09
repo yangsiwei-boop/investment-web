@@ -2,7 +2,9 @@ import { request } from '@/utils/request'
 import type {
   User,
   LoginRequest,
+  LoginResponse,
   RegisterRequest,
+  RegisterResponse,
   SendCodeRequest,
   ApiResponse
 } from '@/types'
@@ -13,28 +15,38 @@ export function sendVerificationCode(data: SendCodeRequest): Promise<ApiResponse
 }
 
 // 登录
-export function login(data: LoginRequest): Promise<ApiResponse<{ token: string; user: User }>> {
+export function login(data: LoginRequest): Promise<ApiResponse<LoginResponse>> {
   return request.post('/auth/login', data)
 }
 
 // 注册
-export function register(data: RegisterRequest): Promise<ApiResponse<{ token: string; user: User }>> {
+export function register(data: RegisterRequest): Promise<ApiResponse<RegisterResponse>> {
   return request.post('/auth/register', data)
 }
 
-// 获取当前用户信息
-export function getCurrentUser(): Promise<ApiResponse<User>> {
-  return request.get('/auth/me')
+// 刷新Token
+export function refreshToken(refreshToken: string): Promise<ApiResponse<{ token: string; expiresAt: number }>> {
+  return request.post('/auth/refresh', { refreshToken })
 }
 
-// 更新用户信息
-export function updateUserProfile(data: Partial<User>): Promise<ApiResponse<User>> {
-  return request.put('/auth/profile', data)
+// 获取当前用户资料
+export function getCurrentUser(): Promise<ApiResponse<User>> {
+  return request.get('/profile')
+}
+
+// 更新用户资料
+export function updateUserProfile(data: {
+  nickname?: string
+  email?: string
+  avatarUrl?: string
+  bio?: string
+}): Promise<ApiResponse<User>> {
+  return request.put('/profile', data)
 }
 
 // 修改密码
 export function changePassword(data: { oldPassword: string; newPassword: string }): Promise<ApiResponse> {
-  return request.post('/auth/change-password', data)
+  return request.post('/auth/password/change', data)
 }
 
 // 退出登录
@@ -42,36 +54,71 @@ export function logout(): Promise<ApiResponse> {
   return request.post('/auth/logout')
 }
 
-// 上传身份验证文件
-export function uploadVerificationFile(file: File, type: 'id_card_front' | 'id_card_back' | 'business_license' | 'business_card'): Promise<ApiResponse<{ url: string }>> {
-  const formData = new FormData()
-  formData.append('file', file)
-  formData.append('type', type)
-  return request.post('/auth/upload-verification', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  })
-}
-
-// 提交身份验证
+// 提交实名认证
 export function submitVerification(data: {
   realName: string
   idCardNumber: string
   idCardFrontUrl: string
   idCardBackUrl: string
+  verificationType?: 'investor' | 'entrepreneur'
   businessLicenseUrl?: string
-  businessCardUrl?: string
   companyName?: string
-  position?: string
-  contactPhone?: string
-  contactEmail?: string
-}): Promise<ApiResponse> {
-  return request.post('/auth/verify', data)
+}): Promise<ApiResponse<number>> {
+  return request.post('/profile/verification', data)
 }
 
-// 获取验证状态
-export function getVerificationStatus(): Promise<ApiResponse<{
-  status: 'pending' | 'approved' | 'rejected' | 'not_submitted'
-  rejectReason?: string
+// 获取认证状态
+export function getVerificationStatus(): Promise<ApiResponse<string>> {
+  return request.get('/profile/verification/status')
+}
+
+// 上传图片
+export function uploadImage(file: File, dir?: string): Promise<ApiResponse<{
+  fileName: string
+  filePath: string
+  fileUrl: string
+  fileSize: number
+  fileType: string
 }>> {
-  return request.get('/auth/verification-status')
+  const formData = new FormData()
+  formData.append('file', file)
+  if (dir) {
+    formData.append('dir', dir)
+  }
+  return request.post('/common/upload/image', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
+}
+
+// 上传文档
+export function uploadDocument(file: File, dir?: string): Promise<ApiResponse<{
+  fileName: string
+  filePath: string
+  fileUrl: string
+  fileSize: number
+  fileType: string
+}>> {
+  const formData = new FormData()
+  formData.append('file', file)
+  if (dir) {
+    formData.append('dir', dir)
+  }
+  return request.post('/common/upload/document', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
+}
+
+// 上传头像
+export function uploadAvatar(file: File): Promise<ApiResponse<{
+  fileName: string
+  filePath: string
+  fileUrl: string
+  fileSize: number
+  fileType: string
+}>> {
+  const formData = new FormData()
+  formData.append('file', file)
+  return request.post('/common/upload/avatar', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
 }

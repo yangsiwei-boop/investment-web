@@ -81,14 +81,14 @@ const formRef = ref<FormInstance>()
 const loading = ref(false)
 
 const roles = [
-  { label: '投资人', value: 'investor' as UserType },
-  { label: '融资用户', value: 'entrepreneur' as UserType }
+  { label: '投资人', value: 'INVESTOR' as UserType },
+  { label: '融资用户', value: 'ENTREPRENEUR' as UserType }
 ]
 
 const form = reactive({
   phone: '',
   password: '',
-  userType: 'investor' as UserType
+  userType: 'INVESTOR' as UserType
 })
 
 const rules: FormRules = {
@@ -109,7 +109,7 @@ async function handleLogin() {
     await formRef.value.validate()
     loading.value = true
 
-    await authStore.login(form.phone, form.password, form.userType)
+    await authStore.login(form.phone, form.password)
 
     ElMessage.success('登录成功')
 
@@ -117,7 +117,7 @@ async function handleLogin() {
     const redirect = route.query.redirect as string
     if (redirect) {
       router.push(redirect)
-    } else if (form.userType === 'investor') {
+    } else if (form.userType === 'INVESTOR') {
       router.push({ name: 'InvestorHome' })
     } else {
       router.push({ name: 'EntrepreneurHome' })

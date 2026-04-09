@@ -41,10 +41,10 @@
             />
           </el-form-item>
 
-          <el-form-item prop="verificationCode" label="验证码">
+          <el-form-item prop="code" label="验证码">
             <div class="code-input">
               <el-input
-                v-model="form.verificationCode"
+                v-model="form.code"
                 placeholder="请输入验证码"
                 size="large"
                 maxlength="6"
@@ -152,18 +152,18 @@ const sendingCode = ref(false)
 const countdown = ref(0)
 
 const roles = [
-  { label: '投资人', value: 'investor' as UserType },
-  { label: '融资用户', value: 'entrepreneur' as UserType }
+  { label: '投资人', value: 'INVESTOR' as UserType },
+  { label: '融资用户', value: 'ENTREPRENEUR' as UserType }
 ]
 
 const form = reactive({
   phone: '',
-  verificationCode: '',
+  code: '',
   password: '',
   confirmPassword: '',
   realName: '',
   email: '',
-  userType: 'investor' as UserType
+  userType: 'INVESTOR' as UserType
 })
 
 const validatePass = (_rule: any, value: any, callback: any) => {
@@ -181,7 +181,7 @@ const rules: FormRules = {
     { required: true, message: '请输入手机号', trigger: 'blur' },
     { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号', trigger: 'blur' }
   ],
-  verificationCode: [
+  code: [
     { required: true, message: '请输入验证码', trigger: 'blur' },
     { len: 6, message: '验证码为6位数字', trigger: 'blur' }
   ],
@@ -239,7 +239,7 @@ async function nextStep() {
   // 获取当前步骤需要验证的字段
   const fieldsToValidate: string[] = []
   if (step.value === 1) {
-    fieldsToValidate.push('phone', 'verificationCode')
+    fieldsToValidate.push('phone', 'code')
   } else if (step.value === 2) {
     fieldsToValidate.push('password', 'confirmPassword')
   } else if (step.value === 3) {
@@ -272,7 +272,7 @@ async function handleRegister() {
   try {
     await authStore.register({
       phone: form.phone,
-      verificationCode: form.verificationCode,
+      code: form.code,
       password: form.password,
       userType: form.userType
     })

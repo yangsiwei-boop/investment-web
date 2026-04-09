@@ -166,7 +166,7 @@ const idFrontFile = ref<File | null>(null)
 const idBackFile = ref<File | null>(null)
 
 const userTypeLabel = computed(() => {
-  return authStore.user?.userType === 'investor' ? '投资人' : '融资用户'
+  return authStore.user?.userType === 'INVESTOR' ? '投资人' : '融资用户'
 })
 
 const form = reactive({
@@ -215,10 +215,6 @@ async function handleSubmit() {
     await formRef.value.validate()
 
     // 检查文件是否上传
-    if (!cardFile.value) {
-      ElMessage.warning('请上传名片')
-      return
-    }
     if (!licenseFile.value) {
       ElMessage.warning('请上传企业营业执照')
       return
@@ -231,29 +227,27 @@ async function handleSubmit() {
     loading.value = true
 
     // 上传文件
-    const [cardRes, licenseRes, idFrontRes, idBackRes] = await Promise.all([
-      authApi.uploadVerificationFile(cardFile.value, 'business_card'),
-      authApi.uploadVerificationFile(licenseFile.value, 'business_license'),
-      authApi.uploadVerificationFile(idFrontFile.value, 'id_card_front'),
-      authApi.uploadVerificationFile(idBackFile.value, 'id_card_back')
+    const [licenseRes, idFrontRes, idBackRes] = await Promise.all([
+      authApi.uploadImage(licenseFile.value, 'verification'),
+      authApi.uploadImage(idFrontFile.value, 'verification'),
+      authApi.uploadImage(idBackFile.value, 'verification')
     ])
 
     // 提交验证
     await authApi.submitVerification({
       realName: form.realName,
       idCardNumber: form.idCardNumber,
-      idCardFrontUrl: idFrontRes.data.url,
-      idCardBackUrl: idBackRes.data.url,
-      businessLicenseUrl: licenseRes.data.url,
-      businessCardUrl: cardRes.data.url,
-      companyName: form.companyName,
-      position: form.position
+      idCardFrontUrl: idFrontRes.data.fileUrl,
+      idCardBackUrl: idBackRes.data.fileUrl,
+      businessLicenseUrl: licenseRes.data.fileUrl,
+      verificationType: authStore.user?.userType === 'INVESTOR' ? 'investor' : 'entrepreneur',
+      companyName: form.companyName
     })
 
     ElMessage.success('提交成功，请等待审核')
 
     // 跳转到工作台
-    if (authStore.user?.userType === 'investor') {
+    if (authStore.user?.userType === 'INVESTOR') {
       router.push({ name: 'InvestorHome' })
     } else {
       router.push({ name: 'EntrepreneurHome' })

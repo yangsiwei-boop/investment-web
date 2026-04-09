@@ -80,7 +80,7 @@
         <div class="sidebar-card">
           <h4>📊 投资匹配度</h4>
           <div class="match-score">
-            <div class="score">{{ teaser.matchScoreAvg || 0 }}%</div>
+            <div class="score">{{ teaser.matchScore || 0 }}%</div>
             <div class="label">高度匹配您的投资偏好</div>
           </div>
         </div>
@@ -225,10 +225,10 @@ async function toggleFavorite() {
 
   try {
     if (isFavorite.value) {
-      await investorApi.unfavoriteTeaser(teaser.value.id)
+      await investorApi.removeFavorite(teaser.value.id)
       ElMessage.success('已取消收藏')
     } else {
-      await investorApi.favoriteTeaser(teaser.value.id)
+      await investorApi.addFavorite({ teaserId: teaser.value.id })
       ElMessage.success('已收藏')
     }
     isFavorite.value = !isFavorite.value

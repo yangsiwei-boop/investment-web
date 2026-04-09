@@ -26,7 +26,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/investor',
     component: () => import('@/components/layout/InvestorLayout.vue'),
-    meta: { requiresAuth: true, userType: 'investor' },
+    meta: { requiresAuth: true, userType: 'INVESTOR' },
     children: [
       {
         path: '',
@@ -100,7 +100,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/entrepreneur',
     component: () => import('@/components/layout/EntrepreneurLayout.vue'),
-    meta: { requiresAuth: true, userType: 'entrepreneur' },
+    meta: { requiresAuth: true, userType: 'ENTREPRENEUR' },
     children: [
       {
         path: '',
@@ -176,9 +176,9 @@ router.beforeEach((to, _from, next) => {
   } else if (to.meta.guest && authStore.isAuthenticated) {
     // 已登录用户不能访问guest页面
     const userType = authStore.user?.userType
-    if (userType === 'investor') {
+    if (userType === 'INVESTOR') {
       next({ name: 'InvestorHome' })
-    } else if (userType === 'entrepreneur') {
+    } else if (userType === 'ENTREPRENEUR') {
       next({ name: 'EntrepreneurHome' })
     } else {
       next()
@@ -186,9 +186,9 @@ router.beforeEach((to, _from, next) => {
   } else if (to.meta.userType && authStore.user?.userType !== to.meta.userType) {
     // 用户类型不匹配
     const userType = authStore.user?.userType
-    if (userType === 'investor') {
+    if (userType === 'INVESTOR') {
       next({ name: 'InvestorHome' })
-    } else if (userType === 'entrepreneur') {
+    } else if (userType === 'ENTREPRENEUR') {
       next({ name: 'EntrepreneurHome' })
     } else {
       next({ name: 'Login' })

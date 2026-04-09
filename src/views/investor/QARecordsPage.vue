@@ -18,11 +18,11 @@
       <div v-for="record in qaRecords" :key="record.id" class="qa-item">
         <div class="qa-header">
           <div class="project-info">
-            <span class="project-name">{{ getProjectName(record.projectId) }}</span>
-            <span class="qa-time">{{ formatDate(record.sentAt) }}</span>
+            <span class="project-name">{{ record.teaserTitle || record.projectName || getProjectName(record.projectId) }}</span>
+            <span class="qa-time">{{ formatDate(record.questionedAt || record.sentAt || record.createdAt) }}</span>
           </div>
-          <el-tag :type="getStatusType(record.questionStatus)" size="small">
-            {{ getStatusLabel(record.questionStatus) }}
+          <el-tag :type="getStatusType(record.status || record.questionStatus)" size="small">
+            {{ getStatusLabel(record.status || record.questionStatus) }}
           </el-tag>
         </div>
 
@@ -54,7 +54,7 @@
         </div>
 
         <div class="qa-actions">
-          <el-button size="small" @click="viewProject(record.projectId)">查看项目</el-button>
+          <el-button size="small" @click="viewProject(record.projectId || record.teaserId)">查看项目</el-button>
           <el-button size="small" v-if="record.answer && record.isPublic" @click="viewPublicQA(record)">
             查看公开问答
           </el-button>
@@ -106,11 +106,11 @@ const statusFilter = ref('')
 
 const projectNames: Record<number, string> = {}
 
-function formatDate(date: string) {
-  return dayjs(date).format('YYYY-MM-DD HH:mm')
+function formatDate(date: string | undefined) {
+  return date ? dayjs(date).format('YYYY-MM-DD HH:mm') : ''
 }
 
-function getStatusType(status: string) {
+function getStatusType(status: string | undefined): 'primary' | 'success' | 'warning' | 'info' | 'danger' {
   switch (status) {
     case 'pending':
       return 'warning'
@@ -119,11 +119,11 @@ function getStatusType(status: string) {
     case 'ignored':
       return 'info'
     default:
-      return ''
+      return 'info'
   }
 }
 
-function getStatusLabel(status: string) {
+function getStatusLabel(status: string | undefined) {
   switch (status) {
     case 'pending':
       return '待回复'
@@ -132,16 +132,18 @@ function getStatusLabel(status: string) {
     case 'ignored':
       return '已忽略'
     default:
-      return status
+      return status || ''
   }
 }
 
-function getProjectName(projectId: number): string {
-  return projectNames[projectId] || `项目 #${projectId}`
+function getProjectName(projectId: number | undefined): string {
+  return (projectId && projectNames[projectId]) || `项目`
 }
 
-function viewProject(projectId: number) {
-  router.push({ name: 'TeaserDetail', params: { id: projectId } })
+function viewProject(projectId: number | undefined) {
+  if (projectId) {
+    router.push({ name: 'TeaserDetail', params: { id: projectId } })
+  }
 }
 
 function viewPublicQA(record: QARecord) {
@@ -151,20 +153,19 @@ function viewPublicQA(record: QARecord) {
 function sendFollowUp(record: QARecord) {
   router.push({
     name: 'SendQuestion',
-    params: { id: record.projectId }
+    params: { id: record.projectId || record.teaserId }
   })
 }
 
 async function loadQARecords() {
   loading.value = true
   try {
-    const res = await investorApi.getQARecords({
-      status: statusFilter.value as any,
+    const res = await investorApi.getQAList({
       page: currentPage.value,
-      pageSize
+      size: pageSize
     })
-    qaRecords.value = res.data.items
-    total.value = res.data.total
+    qaRecords.value = res.data.content
+    total.value = res.data.totalElements
   } catch (error) {
     console.error('Failed to load QA records:', error)
   } finally {

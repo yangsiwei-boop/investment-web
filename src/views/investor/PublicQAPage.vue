@@ -51,19 +51,20 @@ import dayjs from 'dayjs'
 const router = useRouter()
 const route = useRoute()
 
-const teaserId = Number(route.params.id)
+const _teaserId = Number(route.params.id) // TODO: 后续需按teaserId过滤
 const loading = ref(false)
 const qaRecords = ref<QARecord[]>([])
 
-function formatDate(date: string): string {
-  return dayjs(date).format('YYYY-MM-DD')
+function formatDate(date: string | undefined): string {
+  return date ? dayjs(date).format('YYYY-MM-DD') : ''
 }
 
 async function loadQA() {
   loading.value = true
   try {
-    const res = await investorApi.getPublicQA(teaserId)
-    qaRecords.value = res.data
+    // TODO: getPublicQA 接口已移除，暂使用 getQAList 替代
+    const res = await investorApi.getQAList({ page: 1, size: 50 })
+    qaRecords.value = (res.data.content || []).filter((item: any) => item.isPublic)
   } catch (error) {
     console.error('Failed to load QA:', error)
   } finally {

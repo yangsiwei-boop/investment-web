@@ -16,7 +16,7 @@
         @click="handleClick(notification)"
       >
         <div class="notification-icon">
-          {{ getNotificationIcon(notification.notificationType) }}
+          {{ getNotificationIcon(notification.type) }}
         </div>
         <div class="notification-content">
           <div class="notification-title">{{ notification.title }}</div>
@@ -51,7 +51,7 @@ const notificationStore = useNotificationStore()
 const notifications = computed(() => notificationStore.notifications)
 const unreadCount = computed(() => notificationStore.unreadCount)
 
-function getNotificationIcon(type: Notification['notificationType']): string {
+function getNotificationIcon(type: Notification['type']): string {
   const iconMap: Record<string, string> = {
     question_received: '❓',
     question_answered: '💬',

@@ -164,16 +164,16 @@ function getCategoryLabel(category: string): string {
   return categories.find(c => c.value === category)?.label || category
 }
 
-function getCategoryType(category: string): '' | 'success' | 'warning' | 'info' | 'danger' {
-  const types: Record<string, '' | 'success' | 'warning' | 'info' | 'danger'> = {
+function getCategoryType(category: string): 'primary' | 'success' | 'warning' | 'info' | 'danger' {
+  const types: Record<string, 'primary' | 'success' | 'warning' | 'info' | 'danger'> = {
     business_model: 'success',
     product_technology: 'warning',
     market_expansion: 'info',
     financial_data: 'danger',
-    team: '',
+    team: 'primary',
     other: 'info'
   }
-  return types[category] || ''
+  return types[category] || 'info'
 }
 
 function showAddDialog() {

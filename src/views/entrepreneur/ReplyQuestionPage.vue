@@ -13,10 +13,10 @@
     <div class="question-card" v-if="question">
       <div class="question-header">
         <div class="investor-info">
-          <el-avatar :size="40">{{ question.investorName?.charAt(0) || '投' }}</el-avatar>
+          <el-avatar :size="40">{{ (question.questionerName || question.investorName)?.charAt(0) || '投' }}</el-avatar>
           <div class="investor-detail">
-            <div class="investor-name">{{ question.investorName || '投资人' }}</div>
-            <div class="question-time">{{ formatDate(question.sentAt) }}</div>
+            <div class="investor-name">{{ question.questionerName || question.investorName || '投资人' }}</div>
+            <div class="question-time">{{ formatDate(question.questionedAt || question.sentAt || '') }}</div>
           </div>
         </div>
         <el-tag :type="question.status === 'pending' ? 'warning' : 'success'">
@@ -25,7 +25,7 @@
       </div>
 
       <div class="question-content">
-        <div class="question-title">{{ question.questionTitle }}</div>
+        <div class="question-title">{{ question.questionTitle || question.question }}</div>
         <div class="question-text">{{ question.question }}</div>
       </div>
     </div>
@@ -115,7 +115,7 @@ async function loadQuestion() {
   try {
     // 使用列表接口获取问题详情
     const res = await entrepreneurApi.getReceivedQuestions({})
-    const found = res.data.items.find(q => q.id === questionId)
+    const found = res.data.content.find(q => q.id === questionId)
     if (found) {
       question.value = found
       // 如果已有回复，填充表单

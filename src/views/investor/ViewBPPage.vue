@@ -55,7 +55,8 @@ function formatSize(bytes: number): string {
 
 async function loadBP() {
   try {
-    const res = await investorApi.getBPContent(applicationId)
+    // TODO: getBPContent 接口已移除，暂使用 getApplicationDetail 替代
+    const res = await investorApi.getApplicationDetail(applicationId)
     bpInfo.value = res.data
   } catch (error) {
     ElMessage.error('加载失败')

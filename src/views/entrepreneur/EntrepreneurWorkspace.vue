@@ -68,7 +68,7 @@
             </div>
           </div>
           <div class="bp-status" :class="bp.teaserGenerationStatus">
-            {{ getStatusLabel(bp.teaserGenerationStatus) }}
+            {{ getStatusLabel(bp.teaserGenerationStatus || '') }}
           </div>
           <div class="bp-actions">
             <el-button size="small" @click="viewTeaser(bp)" v-if="bp.teaserId">
@@ -182,12 +182,16 @@ function handlePendingItem(item: any) {
 
 async function loadData() {
   try {
-    const [statsRes, bpRes] = await Promise.all([
-      entrepreneurApi.getEntrepreneurStats(),
-      entrepreneurApi.getBusinessPlans()
-    ])
+    const statsRes = await entrepreneurApi.getEntrepreneurDashboard()
     stats.value = statsRes.data
-    businessPlans.value = bpRes.data.slice(0, 5) // 只显示前5个
+
+    // 加载项目列表，取第一个项目的BP展示
+    const projectsRes = await entrepreneurApi.getProjects({ page: 0, size: 1 })
+    const projects = projectsRes.data.content
+    if (projects.length > 0) {
+      const bpRes = await entrepreneurApi.getBusinessPlans(projects[0].id)
+      businessPlans.value = bpRes.data.slice(0, 5) // 只显示前5个
+    }
   } catch (error) {
     console.error('Failed to load data:', error)
   }

@@ -69,6 +69,7 @@ const route = useRoute()
 const projectId = Number(route.params.id)
 const formRef = ref<FormInstance>()
 const submitting = ref(false)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const project = ref<Project | null>(null)
 
 const form = reactive({
@@ -98,10 +99,10 @@ async function handleSubmit() {
     await formRef.value.validate()
     submitting.value = true
 
-    await investorApi.applyForBP({
-      projectId,
-      entrepreneurUserId: project.value?.entrepreneurUserId || 0,
-      applicationReason: form.applicationReason
+    await investorApi.createApplication({
+      teaserId: projectId,
+      applicationType: 'get_bp',
+      reason: form.applicationReason
     })
 
     ElMessage.success('申请已提交')

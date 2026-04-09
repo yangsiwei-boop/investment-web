@@ -8,6 +8,7 @@ import * as entrepreneurApi from '@/api/entrepreneur'
 export const useAuthStore = defineStore('auth', () => {
   // 状态
   const token = ref<string | null>(localStorage.getItem('token'))
+  const refreshToken = ref<string | null>(localStorage.getItem('refreshToken'))
   const user = ref<User | null>(null)
   const investorProfile = ref<InvestorProfile | null>(null)
   const entrepreneurProfile = ref<EntrepreneurProfile | null>(null)
@@ -16,19 +17,22 @@ export const useAuthStore = defineStore('auth', () => {
   // 计算属性
   const isAuthenticated = computed(() => !!token.value && !!user.value)
   const userType = computed(() => user.value?.userType)
-  const isInvestor = computed(() => user.value?.userType === 'investor')
-  const isEntrepreneur = computed(() => user.value?.userType === 'entrepreneur')
-  const isAdmin = computed(() => user.value?.userType === 'admin')
+  const isInvestor = computed(() => user.value?.userType === 'INVESTOR')
+  const isEntrepreneur = computed(() => user.value?.userType === 'ENTREPRENEUR')
+  const isAdmin = computed(() => user.value?.userType === 'ADMIN')
   const isVerified = computed(() => user.value?.isVerified)
 
   // 登录
-  async function login(phone: string, password: string, userType: UserType) {
+  async function login(phone: string, password: string, loginType: 'PASSWORD' | 'SMS_CODE' = 'PASSWORD') {
     loading.value = true
     try {
-      const res = await authApi.login({ phone, password, userType })
-      token.value = res.data.token
-      user.value = res.data.user
-      localStorage.setItem('token', res.data.token)
+      const res = await authApi.login({ phone, password, loginType })
+      const { token: newToken, refreshToken: newRefreshToken, user: userData } = res.data
+      token.value = newToken
+      refreshToken.value = newRefreshToken
+      user.value = userData
+      localStorage.setItem('token', newToken)
+      localStorage.setItem('refreshToken', newRefreshToken)
 
       // 加载用户资料
       await loadProfile()
@@ -40,13 +44,15 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   // 注册
-  async function register(data: { phone: string; verificationCode: string; password: string; userType: UserType }) {
+  async function register(data: { phone: string; code: string; password: string; userType: UserType }) {
     loading.value = true
     try {
       const res = await authApi.register(data)
-      token.value = res.data.token
-      user.value = res.data.user
-      localStorage.setItem('token', res.data.token)
+      const { token: newToken, refreshToken: newRefreshToken } = res.data
+      token.value = newToken
+      refreshToken.value = newRefreshToken
+      localStorage.setItem('token', newToken)
+      localStorage.setItem('refreshToken', newRefreshToken)
       return res
     } finally {
       loading.value = false
@@ -63,10 +69,10 @@ export const useAuthStore = defineStore('auth', () => {
     if (!user.value) return
 
     try {
-      if (user.value.userType === 'investor') {
+      if (user.value.userType === 'INVESTOR') {
         const res = await investorApi.getInvestorProfile()
         investorProfile.value = res.data
-      } else if (user.value.userType === 'entrepreneur') {
+      } else if (user.value.userType === 'ENTREPRENEUR') {
         const res = await entrepreneurApi.getEntrepreneurProfile()
         entrepreneurProfile.value = res.data
       }
@@ -85,7 +91,6 @@ export const useAuthStore = defineStore('auth', () => {
       user.value = res.data
       await loadProfile()
     } catch (error) {
-      // token无效，清除登录状态
       logout()
       throw error
     } finally {
@@ -95,17 +100,25 @@ export const useAuthStore = defineStore('auth', () => {
 
   // 退出登录
   function logout() {
+    // 尝试调用后端登出接口
+    if (token.value) {
+      authApi.logout().catch(() => {})
+    }
     token.value = null
+    refreshToken.value = null
     user.value = null
     investorProfile.value = null
     entrepreneurProfile.value = null
     localStorage.removeItem('token')
+    localStorage.removeItem('refreshToken')
   }
 
-  // 更新用户信息
-  async function updateProfile(data: Partial<User>) {
+  // 更新用户资料
+  async function updateProfile(data: { nickname?: string; email?: string; avatarUrl?: string; bio?: string }) {
     const res = await authApi.updateUserProfile(data)
-    user.value = res.data
+    if (res.data) {
+      user.value = { ...user.value!, ...res.data }
+    }
     return res
   }
 
@@ -123,6 +136,7 @@ export const useAuthStore = defineStore('auth', () => {
   return {
     // 状态
     token,
+    refreshToken,
     user,
     investorProfile,
     entrepreneurProfile,

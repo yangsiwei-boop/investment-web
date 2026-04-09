@@ -339,7 +339,9 @@ async function handleSubmit() {
       ElMessage.success('修改已保存')
     } else {
       const res = await entrepreneurApi.createProject(form.value)
-      await entrepreneurApi.publishProject(res.data.id)
+      // 自动生成Teaser并发布
+      const teaserRes = await entrepreneurApi.autoGenerateTeaser(res.data.id)
+      await entrepreneurApi.publishTeaser(teaserRes.data.id)
       ElMessage.success('项目已发布')
     }
 
