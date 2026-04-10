@@ -206,20 +206,8 @@ export interface Application {
   createdAt: string
 }
 
-// 问题库问题
-export interface QuestionLibraryItem {
-  id: number
-  questionTitle: string
-  questionDescription?: string
-  category: 'business_model' | 'product_technology' | 'market_expansion' | 'financial_data' | 'team' | 'other'
-  questionTags?: string
-  isFrequent: boolean
-  isTemplate: boolean
-  usageCount: number
-  lastUsedAt?: string
-  sortOrder: number
-  createdAt: string
-}
+// 问题库问题（类型定义在 @/api/question 中）
+export type { QuestionLibraryItem } from '@/api/question'
 
 // 投资分析
 export interface InvestmentAnalysis {

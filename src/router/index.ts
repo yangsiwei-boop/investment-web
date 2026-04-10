@@ -173,9 +173,14 @@ router.beforeEach((to, _from, next) => {
   const isAuth = authStore.isAuthenticated
   const userType = authStore.user?.userType
 
-  if (to.meta.requiresAuth && !isAuth) {
+  // 使用 matched 数组检查父路由的 meta（子路由不自动继承 meta）
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
+  const matchedUserType = to.matched.find(record => record.meta.userType)?.meta.userType as string | undefined
+  const isGuestOnly = to.matched.some(record => record.meta.guest)
+
+  if (requiresAuth && !isAuth) {
     next({ name: 'Login', query: { redirect: to.fullPath } })
-  } else if (to.meta.guest && isAuth) {
+  } else if (isGuestOnly && isAuth) {
     if (userType === 'INVESTOR') {
       next({ name: 'InvestorHome' })
     } else if (userType === 'ENTREPRENEUR') {
@@ -183,7 +188,7 @@ router.beforeEach((to, _from, next) => {
     } else {
       next()
     }
-  } else if (to.meta.userType && userType !== to.meta.userType) {
+  } else if (matchedUserType && userType !== matchedUserType) {
     if (userType === 'INVESTOR') {
       next({ name: 'InvestorHome' })
     } else if (userType === 'ENTREPRENEUR') {
