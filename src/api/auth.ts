@@ -51,7 +51,7 @@ export function changePassword(data: { oldPassword: string; newPassword: string 
 
 // 退出登录
 export function logout(): Promise<ApiResponse> {
-  return request.post('/auth/logout')
+  return request.post('/auth/logout', {}, { headers: { _silent: true } } as any)
 }
 
 // 提交实名认证

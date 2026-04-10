@@ -317,13 +317,13 @@ function handleExport() {
 
 function handleApplyBP() {
   if (teaser.value) {
-    router.push({ name: 'ApplyBP', params: { id: teaser.value.projectId } })
+    router.push({ name: 'ApplyBP', params: { id: teaser.value.id } })
   }
 }
 
 function handleSendQuestion() {
   if (teaser.value) {
-    router.push({ name: 'SendQuestion', params: { id: teaser.value.projectId } })
+    router.push({ name: 'SendQuestion', params: { id: teaser.value.id } })
   }
 }
 

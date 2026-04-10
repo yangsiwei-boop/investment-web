@@ -15,7 +15,7 @@ import type {
 
 // 获取融资用户资料
 export function getEntrepreneurProfile(): Promise<ApiResponse<EntrepreneurProfile>> {
-  return request.get('/profile/entrepreneur')
+  return request.get('/profile/entrepreneur', { headers: { _silent: true } } as any)
 }
 
 // 更新融资用户资料

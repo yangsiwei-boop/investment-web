@@ -2,6 +2,7 @@ import axios from 'axios'
 import type { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 import { ElMessage } from 'element-plus'
 import router from '@/router'
+import { useAuthStore } from '@/stores/auth'
 
 // 标准化分页格式：后端Teaser接口返回items/total/page/pageSize，统一转为content/totalElements
 function normalizePagination(res: any): any {
@@ -63,8 +64,8 @@ async function refreshToken(): Promise<string | null> {
 
 // 清除登录状态并跳转
 function clearAuthAndRedirect() {
-  localStorage.removeItem('token')
-  localStorage.removeItem('refreshToken')
+  const authStore = useAuthStore()
+  authStore.logout()
   router.push({ name: 'Login' })
 }
 
@@ -120,7 +121,10 @@ service.interceptors.response.use(
       }
 
       // 其他业务错误（不跳登录页）
-      ElMessage.error(res.message || '请求失败')
+      // 静默请求不弹提示（如 loadProfile、logout 等）
+      if (!(response.config.headers as any)?._silent) {
+        ElMessage.error(res.message || '请求失败')
+      }
       return Promise.reject(new Error(res.message || '请求失败'))
     }
 
@@ -130,25 +134,38 @@ service.interceptors.response.use(
     console.error('Response error:', error.response?.status, error.config?.url)
 
     if (error.response) {
+      const silent = (error.config?.headers as any)?._silent
       switch (error.response.status) {
         case 401:
-          ElMessage.error('登录已过期，请重新登录')
+          if (!silent) {
+            ElMessage.error('登录已过期，请重新登录')
+          }
           clearAuthAndRedirect()
           break
         case 403:
-          ElMessage.error('没有权限访问')
+          if (!silent) {
+            ElMessage.error('没有权限访问')
+          }
           break
         case 404:
-          ElMessage.error('请求的资源不存在')
+          if (!silent) {
+            ElMessage.error('请求的资源不存在')
+          }
           break
         case 500:
-          ElMessage.error('服务器错误')
+          if (!silent) {
+            ElMessage.error('服务器错误')
+          }
           break
         default:
-          ElMessage.error(error.message || '请求失败')
+          if (!silent) {
+            ElMessage.error(error.message || '请求失败')
+          }
       }
     } else {
-      ElMessage.error('网络错误，请检查网络连接')
+      if (!(error.config?.headers as any)?._silent) {
+        ElMessage.error('网络错误，请检查网络连接')
+      }
     }
 
     return Promise.reject(error)

@@ -256,7 +256,7 @@ function handleSendQuestion() {
   if (teaser.value) {
     router.push({
       name: 'SendQuestion',
-      params: { id: teaser.value.projectId }
+      params: { id: teaser.value.id }
     })
   }
 }
@@ -265,7 +265,7 @@ function handleApplyBP() {
   if (teaser.value) {
     router.push({
       name: 'ApplyBP',
-      params: { id: teaser.value.projectId }
+      params: { id: teaser.value.id }
     })
   }
 }
@@ -274,7 +274,7 @@ function handleApplyContact() {
   if (teaser.value) {
     router.push({
       name: 'ApplyContact',
-      params: { id: teaser.value.projectId }
+      params: { id: teaser.value.id }
     })
   }
 }

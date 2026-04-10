@@ -17,7 +17,7 @@ import type {
 
 // 获取投资人资料
 export function getInvestorProfile(): Promise<ApiResponse<InvestorProfile>> {
-  return request.get('/profile/investor')
+  return request.get('/profile/investor', { headers: { _silent: true } } as any)
 }
 
 // 更新投资人资料
