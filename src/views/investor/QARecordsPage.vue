@@ -77,7 +77,8 @@
         <!-- Inline follow-up input -->
         <div class="follow-up-input">
           <el-input
-            v-model="followUpTexts[record.id] || ''"
+            :model-value="followUpTexts[record.id] || ''"
+            @update:model-value="followUpTexts[record.id] = $event"
             placeholder="输入追问内容..."
             size="small"
             @keyup.enter="sendFollowUp(record)"

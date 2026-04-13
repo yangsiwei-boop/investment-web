@@ -27,9 +27,12 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
+        target: 'http://120.24.176.90:28080',
         changeOrigin: true
       }
     }
+  },
+  build: {
+    outDir: 'inverstmentWeb'
   }
 })
